@@ -4,7 +4,6 @@ import { AssetsLoader } from '../Utils/AssetsLoader';
 import { AudioManager } from '../Utils/AudioManager';
 import { Helper } from '../Utils/Helpers/Helper';
 import { MyScene, ScenesHelper } from '../Utils/Helpers/ScenesHelper';
-import { TextButton } from '../Utils/UI/Buttons/TextButton';
 
 export class LoadScene extends Phaser.Scene {
     private loadingBarText: Phaser.GameObjects.Text;
@@ -25,6 +24,11 @@ export class LoadScene extends Phaser.Scene {
         );
 
         AssetsLoader.loadAssets(this.cache.json.get('assets'), this);
+
+        this.load.image('bridge', '../../assets/tiled/bridge.png');
+        this.load.image('floor', '../../assets/tiled/floor.png');
+        this.load.image('solidWall', '../../assets/tiled/solidWall.png');
+        this.load.tilemapTiledJSON('map', '../../assets/tiled/map.json');
 
         this.load.on('progress', (value) => {
             //

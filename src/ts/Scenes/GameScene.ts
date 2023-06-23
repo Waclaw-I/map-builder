@@ -35,6 +35,16 @@ export class GameScene extends SceneTemplate {
         this.player = this.add.image(500, 500, 'ballOn');
         this.cameras.main.startFollow(this.player);
 
+        const map = this.add.tilemap('map', 256, 512);
+
+        const solidWall = map.addTilesetImage('solidWall', 'solidWall');
+        const floor = map.addTilesetImage('floor', 'floor');
+
+        if (floor && solidWall) {
+            map.createLayer('floor', [ floor ])?.setCullPadding(4, 4);
+            map.createLayer('wall', [ solidWall ])?.setCullPadding(4, 4);
+        }
+
         this.bindEventHandlers();
         this.bindSceneEventHandlers();
     }
