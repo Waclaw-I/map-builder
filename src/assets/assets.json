@@ -21,7 +21,16 @@
     },
 
     "atlas": {
-        "confetti": ["./atlases/confetti.png", "./atlases/confetti.json"]
+        "confetti": ["./atlases/confetti.png", "./atlases/confetti.json"],
+        "characterIdle": ["./atlases/character/idle.png", "./atlases/character/idle.json"],
+        "characterRun0": ["./atlases/character/run/0.png", "./atlases/character/run/0.json"],
+        "characterRun1": ["./atlases/character/run/1.png", "./atlases/character/run/1.json"],
+        "characterRun2": ["./atlases/character/run/2.png", "./atlases/character/run/2.json"],
+        "characterRun3": ["./atlases/character/run/3.png", "./atlases/character/run/3.json"],
+        "characterRun4": ["./atlases/character/run/4.png", "./atlases/character/run/4.json"],
+        "characterRun5": ["./atlases/character/run/5.png", "./atlases/character/run/5.json"],
+        "characterRun6": ["./atlases/character/run/6.png", "./atlases/character/run/6.json"],
+        "characterRun7": ["./atlases/character/run/7.png", "./atlases/character/run/7.json"]
     },
 
     "bitmapFont": {

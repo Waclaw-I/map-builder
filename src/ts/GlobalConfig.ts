@@ -14,6 +14,8 @@ export class GlobalConfig {
 
     public static readonly FPS_TARGET = 60;
     public static readonly TICK_DURATION = 1000 / GlobalConfig.FPS_TARGET;
+    public static readonly MIN_ZOOM = 0.3;
+    public static readonly MAX_ZOOM = 2;
 
     public static readonly HOMEPAGE_URL = 'https://www.facebook.com/Home-based-Studio-106555638161522';
     public static readonly HOME_BASED_STUDIO_URL = 'https://home-based.studio';
