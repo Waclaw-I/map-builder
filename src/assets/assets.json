@@ -1,0 +1,31 @@
+{
+    "image": {
+        "buttonGreen": "./images/buttonGreen.png",
+        "buttonGreenPressed": "./images/buttonGreenPressed.png",
+        "hbsLogo": "./images/hbsLogo.png",
+        "pauseIcon": "./images/pauseIcon.png",
+        "pauseIconPressed": "./images/pauseIconPressed.png",
+        "closeIcon": "./images/closeIcon.png",
+        "closeIconPressed": "./images/closeIconPressed.png",
+        "popupBackground": "./images/popupBackground.png",
+        "tile": "./images/tile.png",
+        "ballOn": "./images/ballOn.png",
+        "ballOff": "./images/ballOff.png",
+        "backgroundOn": "./images/backgroundOn.png",
+        "backgroundOff": "./images/backgroundOff.png"
+    },
+
+    "audio": {
+        "music": "./audio/music.m4a",
+        "sample": "./audio/sample.mp3"
+    },
+
+    "atlas": {
+        "confetti": ["./atlases/confetti.png", "./atlases/confetti.json"]
+    },
+
+    "bitmapFont": {
+        "openSansSemibold40": ["./bitmapFonts/open_sans/Open-Sans-Semibold-40_0.png", "./bitmapFonts/open_sans/Open-Sans-Semibold-40.fnt"]
+    }
+
+}

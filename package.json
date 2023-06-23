@@ -1,0 +1,62 @@
+{
+  "name": "boilerplate",
+  "version": "1.0.3",
+  "boilerplate_version": "1.0.3",
+  "description": "",
+  "scripts": {
+    "dev": "webpack serve --env env=dev devServer",
+    "build:dev": "webpack --env env=dev",
+    "build:prod": "webpack --env env=production",
+    "build": "webpack --env env=production",
+    "preview": "npx http-server ./dist --port 8000",
+    "preview:firebase": "firebase emulators:start",
+    "lint": "eslint .",
+    "deploy": "webpack --env env=production && firebase deploy --only hosting"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/homebasedstudio/phasergameboilerplate"
+  },
+  "author": "Home-based Studio",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "browserslist": "^4.21.4",
+    "clean-css": "^5.3.1",
+    "clean-webpack-plugin": "^4.0.0",
+    "eslint": "^8.23.1",
+    "extract-loader": "^5.1.0",
+    "file-loader": "^6.2.0",
+    "html-loader": "^4.1.0",
+    "html-webpack-plugin": "^5.5.0",
+    "http-server": "^14.1.1",
+    "image-webpack-loader": "^8.1.0",
+    "json5-loader": "^4.0.1",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "schema-utils": "^4.0.0",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.8.3",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.0",
+    "workbox-expiration": "^6.5.4",
+    "workbox-routing": "^6.5.4",
+    "workbox-strategies": "^6.5.4",
+    "xml-minify-loader": "^0.0.2"
+  },
+  "dependencies": {
+    "@home-based-studio/phaser3-utils": "0.4.11",
+    "bowser": "2.11.0",
+    "gameanalytics": "^4.4.5",
+    "phaser": "^3.60.0",
+    "phaser3-rex-plugins": "^1.1.73",
+    "svelte": "^4.0.0",
+    "svelte-loader": "^3.1.8"
+  },
+  "packageManager": "yarn@3.2.1",
+  "browserslist": [
+    "defaults and not ie 11"
+  ]
+}

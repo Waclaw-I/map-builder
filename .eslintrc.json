@@ -1,0 +1,157 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module",
+        "tsconfigRootDir": "./",
+        "project": [ "./tsconfig.json" ]
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "ignorePatterns": [
+        "**/*.js",
+        "src/stats/",
+        "/dist/*",
+        "/dev/*",
+        "/src/textures/parsers/BitmapTextParser.ts"
+    ],
+    "rules": {
+        "no-prototype-builtins": [ "off" ],
+        "indent": [ "off" ],
+        "@typescript-eslint/indent": [ "error", 4, { "SwitchCase": 1 } ],
+        "sort-imports": [ "off" ],
+        "brace-style": [ "error", "1tbs", { "allowSingleLine": true } ],
+        "@typescript-eslint/brace-style": [ "error", "1tbs", { "allowSingleLine": true } ],
+        "array-bracket-spacing": [ "error", "always" ],
+        "block-spacing": [ "error", "always" ],
+        "camelcase": "off",
+        "@typescript-eslint/camelcase": "off",
+        "comma-dangle": [ "error", "always-multiline" ],
+        "comma-style": [ "error", "last" ],
+        "eol-last": [ "error" ],
+        "@typescript-eslint/keyword-spacing": [ "error", { "after": true } ],
+        "no-lonely-if": "error",
+        "no-mixed-spaces-and-tabs": "error",
+        "no-plusplus": "off",
+        "no-trailing-spaces": [ "error", { "skipBlankLines": true, "ignoreComments": true } ],
+        "no-underscore-dangle": "off",
+        "no-whitespace-before-property": "error",
+        "object-curly-newline": [ "error", { "multiline": true, "minProperties": 0, "consistent": true } ],
+        "one-var-declaration-per-line": [ "error", "initializations" ],
+        "quote-props": [ "error", "consistent" ],
+        "quotes": [ "off" ],
+        "@typescript-eslint/quotes": [ "error", "single" ],
+        "semi-spacing": [ "error", { "before": false, "after": true } ],
+        "semi": [ "off" ],
+        "@typescript-eslint/semi": [ "error", "always" ],
+        "space-before-blocks": "error",
+        "space-before-function-paren": [ "error", { "anonymous": "always", "named": "never", "asyncArrow": "always" }],
+        "@typescript-eslint/space-before-function-paren": [ "error", { "anonymous": "always", "named": "never", "asyncArrow": "always" }],
+        "space-in-parens": [ "error",  "never" ],
+        "space-infix-ops": [ "error", { "int32Hint": true } ],
+        "wrap-regex": "error",
+        "spaced-comment": [ "error", "always", { "block": { "balanced": true, "exceptions": ["*", "!"] }} ],
+        "@typescript-eslint/no-inferrable-types": [ "off" ],
+        "@typescript-eslint/interface-name-prefix": [ "off" ],
+        "no-empty-function": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-empty-function": [ "error", { "allow": [ "functions", "arrowFunctions", "methods" ] } ],
+        "@typescript-eslint/naming-convention": [
+            "error",
+            {
+                "selector": "default",
+                "format": [ "camelCase" ]
+            },
+            {
+                "selector": "function",
+                "format": [ "PascalCase" ]
+            },
+            {
+                "selector": "interface",
+                "format": [ "PascalCase" ]
+            },
+            {
+                "selector": "variable",
+                "format": [ "camelCase", "UPPER_CASE", "PascalCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "property",
+                "format": [ "camelCase", "UPPER_CASE" ],
+                "leadingUnderscore": "forbid"
+            },
+            {
+                "selector": "property",
+                "modifiers": [ "private" ],
+                "format": [ "camelCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "property",
+                "modifiers": [ "protected" ],
+                "format": [ "camelCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "property",
+                "modifiers": [ "readonly" ],
+                "format": [ "camelCase", "UPPER_CASE" ]
+            },
+            {
+                "selector": "property",
+                "prefix": [ "OES" ],
+                "format": null
+            },
+            {
+                "selector": "parameter",
+                "format": [ "camelCase", "UPPER_CASE" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "memberLike",
+                "modifiers": [ "private" ],
+                "format": [ "camelCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "memberLike",
+                "modifiers": [ "protected" ],
+                "format": [ "camelCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "method",
+                "modifiers": [ "private" ],
+                "format": [ "camelCase" ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "typeLike",
+                "format": [ "PascalCase" ]
+            },
+            {
+                "selector": "enum",
+                "format": [ "PascalCase" ]
+            },
+            {
+                "selector": "enumMember",
+                "format": [ "PascalCase" ]
+            }
+        ]
+    }
+}

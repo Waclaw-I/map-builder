@@ -1,0 +1,15 @@
+dist/
+dist.zip
+node_modules/
+.firebase/
+*debug.log
+
+# Yarn Berry (2.xx, 3.xx, etc.) related:
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
