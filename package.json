@@ -49,6 +49,7 @@
   "dependencies": {
     "@home-based-studio/phaser3-utils": "0.4.11",
     "bowser": "2.11.0",
+    "easystarjs": "^0.4.4",
     "gameanalytics": "^4.4.5",
     "phaser": "^3.60.0",
     "phaser3-rex-plugins": "^1.1.73",
