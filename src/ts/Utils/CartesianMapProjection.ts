@@ -61,6 +61,14 @@ export class CartesianMapProjection extends Phaser.GameObjects.Container {
         );
     }
 
+    public setWallOnMap(x: number, y: number): void {
+        if (y >= this.map.length || x >= this.map[0]?.length) {
+            return;
+        }
+        this.map[y][x] = 1;
+        this.grid[y][x].fillColor = this.config.colors.wall;
+    }
+
     private initializeProjection() {
         this.grid = [];
         for (let y = 0; y < this.map.length; y++) {

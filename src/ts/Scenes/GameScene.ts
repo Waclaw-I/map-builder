@@ -107,7 +107,7 @@ export class GameScene extends SceneTemplate {
             moveDirection = Direction.E;
         }
         if (moveDirection !== undefined) {
-            this.player.move(moveDirection);
+            this.player.move(moveDirection, this.mapManager);
         } else {
             this.player.stopRunning();
         }
@@ -137,6 +137,8 @@ export class GameScene extends SceneTemplate {
                 this.moveTo(coords);
             } else {
                 new Wall(this, coords);
+                this.mapManager.updateCollisionGrid(coords.x, coords.y, true);
+                this.mapProjection.setWallOnMap(coords.x, coords.y);
             }
         });
     }

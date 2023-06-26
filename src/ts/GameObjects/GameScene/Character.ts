@@ -1,4 +1,5 @@
 import { MathHelper } from '../../Utils/Helpers/MathHelper';
+import { MapManager } from '../../Utils/MapManager';
 
 export enum Direction {
     NE,
@@ -66,48 +67,54 @@ export class Character extends Phaser.GameObjects.Container {
         }
     }
 
-    public move(direction: Direction): void {
+    public move(direction: Direction, mapManager: MapManager): void {
         this.playRun(direction);
         this.runningDirection = direction;
+        let nextX = this.x;
+        let nextY = this.y;
         switch (direction) {
             case Direction.N: {
-                this.y -= this.speed;
+                nextY = this.y - this.speed;
                 break;
             }
             case Direction.NE: {
-                this.x += this.diagonalSpeed;
-                this.y -= this.diagonalSpeed;
+                nextX = this.x + this.diagonalSpeed;
+                nextY = this.y - this.diagonalSpeed;
                 break;
             }
             case Direction.E: {
-                this.x += this.speed;
+                nextX = this.x + this.speed;
                 break;
             }
             case Direction.SE: {
-                this.x += this.diagonalSpeed;
-                this.y += this.diagonalSpeed;
+                nextX = this.x + this.diagonalSpeed;
+                nextY = this.y + this.diagonalSpeed;
                 break;
             }
             case Direction.S: {
-                this.y += this.speed;
+                nextY = this.y + this.speed;
                 break;
             }
             case Direction.SW: {
-                this.x -= this.diagonalSpeed;
-                this.y += this.diagonalSpeed;
+                nextX = this.x - this.diagonalSpeed;
+                nextY = this.y + this.diagonalSpeed;
                 break;
             }
             case Direction.W: {
-                this.x -= this.speed;
+                nextX = this.x - this.speed;
                 break;
             }
             case Direction.NW: {
-                this.x -= this.diagonalSpeed;
-                this.y -= this.diagonalSpeed;
+                nextX = this.x - this.diagonalSpeed;
+                nextY = this.y - this.diagonalSpeed;
                 break;
             }
         }
-        this.setDepth(100 + this.y);
+        if (!mapManager.isColliding(nextX,nextY)) {
+            this.x = nextX;
+            this.y = nextY;
+            this.setDepth(100 + this.y);
+        }
     }
 
     public finishFollowingPath(cancelled = false): void {

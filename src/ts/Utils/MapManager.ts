@@ -49,6 +49,28 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return this.collisionGrid;
     }
 
+    public isColliding(x: number, y: number): boolean {
+        const coords = this.getFloorTileIndexAtWorldXY(x, y);
+        if (coords === undefined) {
+            console.log('R1');
+            return true;
+        }
+        if (coords.x >= this.map.width || coords.y >= this.map.height) {
+            console.log('R2');
+            return true;
+        }
+        console.log('R3');
+        return this.collisionGrid[coords.y][coords.x] === 0 ? false : true;
+    }
+
+    public updateCollisionGrid(x: number, y: number, collides: boolean): void {
+        if (x >= this.map.width || y >= this.map.height) {
+            console.warn('COLLISION GRID TILE OUT OF BOUNDS');
+            return;
+        }
+        this.collisionGrid[y][x] = collides ? 1 : 0;
+    }
+
     private initializeMap(mapKey: string): void {
         this.map = this.scene.add.tilemap(mapKey);
         this.tilesets = new Map<string, Phaser.Tilemaps.Tileset>();
