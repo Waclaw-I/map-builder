@@ -50,10 +50,10 @@ export class LoadScene extends Phaser.Scene {
         this.cameras.main.fadeOut(500);
         await Helper.wait(this, 500);
 
+        this.scene.run(MyScene.UiScene);
         this.scene.start(MyScene.Game);
         ScenesHelper.currentScene = this.scene.get(MyScene.Game);
 
-        this.scene.run(MyScene.UiScene);
         this.scene.bringToTop(MyScene.UiScene);
         // ScenesHelper.sleepUiScene(true);
 

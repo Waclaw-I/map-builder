@@ -34,6 +34,10 @@
         "characterRun7": ["./atlases/character/run/7.png", "./atlases/character/run/7.json"]
     },
 
+    "json": {
+        "defaultMap": "./maps/map.json"
+    },
+
     "bitmapFont": {
         "openSansSemibold40": ["./bitmapFonts/open_sans/Open-Sans-Semibold-40_0.png", "./bitmapFonts/open_sans/Open-Sans-Semibold-40.fnt"]
     }

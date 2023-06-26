@@ -1,3 +1,5 @@
+import { MathHelper } from '../../Utils/Helpers/MathHelper';
+
 export enum Direction {
     NE,
     E,

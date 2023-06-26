@@ -1,10 +1,12 @@
 import { SceneTemplate } from './SceneTemplate';
-import { MyScene } from '../Utils/Helpers/ScenesHelper';
+import { MyScene, ScenesHelper } from '../Utils/Helpers/ScenesHelper';
 import { GlobalConfig } from '../GlobalConfig';
 import { Character, Direction } from '../GameObjects/GameScene/Character';
 import { PathfindingManager } from '../Utils/PathfindingManager';
 import { Wall } from '../GameObjects/GameScene/Wall';
 import { MapManager } from '../Utils/MapManager';
+import { CartesianMapProjection } from '../Utils/CartesianMapProjection';
+import { UiScene } from './UiScene';
 
 export class GameScene extends SceneTemplate {
 
@@ -18,6 +20,7 @@ export class GameScene extends SceneTemplate {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
 
     private mapManager: MapManager;
+    private mapProjection: CartesianMapProjection;
 
     constructor() {
         super(MyScene.Game);
@@ -32,7 +35,20 @@ export class GameScene extends SceneTemplate {
         this.timer = 0;
         this.cursors = this.input.keyboard?.createCursorKeys();
 
+        // TODO: ZOD would be nice here to check if data from JSON is in correct format.
         this.mapManager = new MapManager(this, 'map');
+        this.mapProjection = new CartesianMapProjection(
+            // NOTE: We pass in UI SCENE, not GAME SCENE. This way we can have our cartesian projection always on top, immovable
+            ScenesHelper.getScene(MyScene.UiScene),
+            16,
+            16,
+            {
+                map: this.mapManager.getCollisionGrid(),
+                tileWidth: this.mapManager.getTileDimensions().width,
+                tileHeight: this.mapManager.getTileDimensions().height,
+            },
+        )
+            .setAlpha(0.5);
 
         this.pathFindingManager = new PathfindingManager(
             this,
@@ -55,10 +71,16 @@ export class GameScene extends SceneTemplate {
         while (this.timer > GlobalConfig.TICK_DURATION) {
             this.handleCursorsInput();
             this.player.update(time, dt);
+            this.mapProjection.updatePlayerPosition(this.player.x, this.player.y);
             this.timer -= GlobalConfig.TICK_DURATION;
         }
         this.graphics.clear();
         this.graphics.fillStyle(0xff0000).fillCircle(this.player.x, this.player.y, 5);
+    }
+
+    // TODO: ADD THIS TO THE REGISTRY, DECOUPLE MAP MANAGER FROM THE SCENE ENTIRELY, DIVIDE INTO LOGIC AND RENDER
+    public getMapManager(): MapManager {
+        return this.mapManager;
     }
 
     private handleCursorsInput() {
