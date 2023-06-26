@@ -1,4 +1,3 @@
-import { MathHelper } from '../../Utils/Helpers/MathHelper';
 import { MapManager } from '../../Utils/MapManager';
 
 export enum Direction {
@@ -22,11 +21,14 @@ export class Character extends Phaser.GameObjects.Container {
 
     private runningDirection?: Direction;
 
+    private currentlyRunningManually: boolean;
+
     constructor(scene: Phaser.Scene, x: number, y: number, speed: number) {
         super(scene, x, y);
 
         this.speed = speed;
         this.diagonalSpeed = speed * Math.sin(Math.PI / 4);
+        this.currentlyRunningManually = false;
         this.runningDirection = undefined;
 
         this.sprite = this.scene.add.sprite(0, 0, 'characterIdle', 0)
@@ -44,9 +46,12 @@ export class Character extends Phaser.GameObjects.Container {
     public update(time: number, dt: number) {
         if (this.pathToFollow) {
             const moveBy = this.computeFollowPathMovement();
+            this.playRun(this.getDirectionFromMovementVector(moveBy));
             this.x += moveBy.x * this.speed;
             this.y += moveBy.y * this.speed;
             this.setDepth(100 + this.y);
+        } else if (!this.currentlyRunningManually) {
+            this.stopRunningAsPathFollow();
         }
     }
 
@@ -59,17 +64,28 @@ export class Character extends Phaser.GameObjects.Container {
         });
     }
 
-    public stopRunning(): void {
-        if (this.runningDirection) {
+    public stopRunningManually(): void {
+        if (this.runningDirection && this.currentlyRunningManually) {
+            this.currentlyRunningManually = false;
             this.sprite.anims.stop();
             this.playIdle();
             this.runningDirection = undefined;
         }
     }
+    
+    public stopRunningAsPathFollow(): void {
+        // if (this.runningDirection === undefined) {
+        //     return;
+        // }
+        this.sprite.anims.stop();
+        this.playIdle();
+        this.runningDirection = undefined;
+    }
 
     public move(direction: Direction, mapManager: MapManager): void {
+        this.currentlyRunningManually = true;
+        this.finishFollowingPath(true);
         this.playRun(direction);
-        this.runningDirection = direction;
         let nextX = this.x;
         let nextY = this.y;
         switch (direction) {
@@ -119,6 +135,7 @@ export class Character extends Phaser.GameObjects.Container {
 
     public finishFollowingPath(cancelled = false): void {
         this.pathToFollow = undefined;
+        this.stopRunningAsPathFollow();
     }
 
     private playIdle(): void {
@@ -130,6 +147,7 @@ export class Character extends Phaser.GameObjects.Container {
         if (this.runningDirection === direction) {
             return;
         }
+        this.runningDirection = direction;
         this.sprite.play(`run${direction}`);
     }
 
@@ -177,14 +195,45 @@ export class Character extends Phaser.GameObjects.Container {
         if (distance < 50) {
             this.pathToFollow.shift();
         }
-        return this.getMovementDirection(xDistance, yDistance, distance);
+        return this.getMovementVector(xDistance, yDistance, distance);
     }
 
-    private getMovementDirection(xDistance: number, yDistance: number, distance: number): { x: number, y: number} {
+    private getMovementVector(xDistance: number, yDistance: number, distance: number): { x: number, y: number} {
         if (distance === 0) {
             return { x: 0, y: 0};
         }
         return { x: xDistance / Math.sqrt(distance), y: yDistance / Math.sqrt(distance) };
+    }
+
+    // NOTE: Animations for pathfinding movement are tricky
+    private getDirectionFromMovementVector(vec: { x: number, y: number }): Direction {
+        const x = Math.round(vec.x);
+        const y = Math.round(vec.y);
+        if (x === 0 && y < 0) {
+            return Direction.N;
+        }
+        if (x === 0 && y > 0) {
+            return Direction.S;
+        }
+        if (x > 0 && y === 0) {
+            return Direction.E;
+        }
+        if (x < 0 && y === 0) {
+            return Direction.W;
+        }
+        // if (x < 0 && y < 0) {
+        //     return Direction.NW;
+        // }
+        // if (x > 0 && y < 0) {
+        //     return Direction.NE;
+        // }
+        // if (x < 0 && y > 0) {
+        //     return Direction.SW;
+        // }
+        // if (x > 0 && y > 0) {
+        //     return Direction.SE;
+        // }
+        return Direction.S;
     }
 
     public getSpeed(): number {

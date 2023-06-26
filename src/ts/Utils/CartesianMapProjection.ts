@@ -53,8 +53,6 @@ export class CartesianMapProjection extends Phaser.GameObjects.Container {
      */
     public updatePlayerPosition(x: number, y: number): void {
         const cartesianCoords = MathHelper.isometricToCartesian({ x, y });
-        // console.log(cartesianCoords);
-        // console.log(Math.floor(cartesianCoords.x / this.config.squareSize), Math.floor(cartesianCoords.y / this.config.squareSize));
         this.player.setPosition(
             Math.floor(cartesianCoords.x / this.widthRatio),
             Math.floor(cartesianCoords.y / this.heightRatio),

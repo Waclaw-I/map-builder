@@ -6,7 +6,6 @@ import { PathfindingManager } from '../Utils/PathfindingManager';
 import { Wall } from '../GameObjects/GameScene/Wall';
 import { MapManager } from '../Utils/MapManager';
 import { CartesianMapProjection } from '../Utils/CartesianMapProjection';
-import { UiScene } from './UiScene';
 
 export class GameScene extends SceneTemplate {
 
@@ -109,7 +108,7 @@ export class GameScene extends SceneTemplate {
         if (moveDirection !== undefined) {
             this.player.move(moveDirection, this.mapManager);
         } else {
-            this.player.stopRunning();
+            this.player.stopRunningManually();
         }
     }
 

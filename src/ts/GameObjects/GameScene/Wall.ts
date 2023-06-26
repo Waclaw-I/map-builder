@@ -15,6 +15,7 @@ export class Wall extends Phaser.GameObjects.Image {
         this.y -= this.displayHeight * 0.5;
 
         this.x += this.offsetX;
+        // TODO: Calculate this offset the right way, pretty please.
         this.setDepth(100 + this.y + this.offsetY + 50);
 
         this.playPlaceAnimation();

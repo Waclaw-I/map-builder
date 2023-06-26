@@ -120,12 +120,4 @@ export class PathfindingManager {
         this.easyStar.setGrid(grid);
         this.easyStar.setAcceptableTiles([ PathTileType.Walkable ]);
     }
-
-    // private logGridToTheConsole(grid: number[][]): void {
-    //     let rowNumber = 0;
-    //     for (const row of grid) {
-    //         console.log(`${rowNumber}:\t${row}`);
-    //         rowNumber += 1;
-    //     }
-    // }
 }
