@@ -3,6 +3,8 @@ import { MyScene } from '../Utils/Helpers/ScenesHelper';
 import { GlobalConfig } from '../GlobalConfig';
 import { Character, Direction } from '../GameObjects/GameScene/Character';
 import { PathfindingManager } from '../Utils/PathfindingManager';
+import { Wall } from '../GameObjects/GameScene/Wall';
+import { MapManager } from '../Utils/MapManager';
 
 export class GameScene extends SceneTemplate {
 
@@ -15,8 +17,7 @@ export class GameScene extends SceneTemplate {
 
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
 
-    private map: Phaser.Tilemaps.Tilemap;
-    private tilemapLayers: Map<string, Phaser.Tilemaps.TilemapLayer | undefined>;
+    private mapManager: MapManager;
 
     constructor() {
         super(MyScene.Game);
@@ -27,37 +28,26 @@ export class GameScene extends SceneTemplate {
     }
 
     public create(): void {
-        this.add.graphics().fillStyle(0xff0000).fillCircle(0, 0, 50);
+        this.graphics = this.add.graphics().setDepth(500);
         this.timer = 0;
         this.cursors = this.input.keyboard?.createCursorKeys();
 
-        this.map = this.add.tilemap('map', 256, 128);
-        this.tilemapLayers = new Map<string, Phaser.Tilemaps.TilemapLayer>();
-
-        const solidWall = this.map.addTilesetImage('solidWall', 'solidWall');
-        const floor = this.map.addTilesetImage('floor', 'floor');
-
-        if (floor && solidWall) {
-            this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floor ])?.setCullPadding(4, 4));
-            this.tilemapLayers.set('wall', this.map.createLayer('wall', [ solidWall ])?.setCullPadding(4, 4));
-        }
-
-        const wallLayer = this.map.getLayer('wall');
-        const wallCollisionGrid = wallLayer?.data.map((row) => row.map((tile) => tile.index === -1 ? 0 : 1)) ?? [];
+        this.mapManager = new MapManager(this, 'map');
 
         this.pathFindingManager = new PathfindingManager(
             this,
-            wallCollisionGrid,
-            { width: this.map.tileWidth, height: this.map.tileHeight },
+            this.mapManager.getCollisionGrid(),
+            this.mapManager.getTileDimensions(),
         );
 
-        this.player = new Character(this, 0, 0, 10);
+        const mapDimensions = this.mapManager.getDimensionsInTiles();
+        const spawnTileCoords = { x: Math.floor(mapDimensions.width / 2), y: Math.floor(mapDimensions.height / 2) };
+        const spawnTile = this.mapManager.getFloorTileAt(spawnTileCoords.x, spawnTileCoords.y);
+        this.player = new Character(this, spawnTile?.pixelX ?? 100, spawnTile?.pixelY ?? 100, 10);
         this.cameras.main.startFollow(this.player);
 
         this.bindEventHandlers();
         this.bindSceneEventHandlers();
-
-        console.log(this.tilemapLayers.get('floor'));
     }
 
     public update(time: number, dt: number): void {
@@ -67,6 +57,8 @@ export class GameScene extends SceneTemplate {
             this.player.update(time, dt);
             this.timer -= GlobalConfig.TICK_DURATION;
         }
+        this.graphics.clear();
+        this.graphics.fillStyle(0xff0000).fillCircle(this.player.x, this.player.y, 5);
     }
 
     private handleCursorsInput() {
@@ -108,12 +100,22 @@ export class GameScene extends SceneTemplate {
         this.input.on(Phaser.Input.Events.POINTER_WHEEL, (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[], dx: number, dy: number) => {
             this.handleScrollWheel(dy);
         });
+        this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
+            const tile = this.mapManager.getFloorTileAtWorldXY(pointer.worldX, pointer.worldY);
+            if (tile) {
+                // tile.tint = 0xff0000;
+            }
+        });
         this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-            // if (pointer.worldX < 0 || pointer.worldY < 0) {
-            //     return;
-            // }
-            console.log(this.map.getTileAtWorldXY(pointer.worldX, pointer.worldY, true, this.cameras.main, this.tilemapLayers.get('floor')));
-            this.moveTo(this.getTileIndexAt(pointer.worldX, pointer.worldY));
+            const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
+            if (coords === undefined) {
+                return;
+            }
+            if (pointer.rightButtonDown()) {
+                this.moveTo(coords);
+            } else {
+                new Wall(this, coords);
+            }
         });
     }
 
@@ -122,34 +124,26 @@ export class GameScene extends SceneTemplate {
         });
     }
 
-    private moveTo(position: { x: number; y: number }) {
+    private moveTo(destination: { x: number; y: number }) {
+        const playerPosition = this.mapManager.getFloorTileIndexAtWorldXY(this.player.x, this.player.y);
+        if (playerPosition === undefined) {
+            return;
+        }
         this.pathFindingManager
-            .findPath(this.getTileIndexAt(this.player.x, this.player.y), position, false)
+            .findPath(playerPosition, destination, false)
             .then((path) => {
                 path.shift(); // get rid of the tile that player is already standing on.
-                console.log(structuredClone(path));
-                console.log(this.mapPathToPixels(path));
                 if (path && path.length > 0) {
-                    this.player.setPathToFollow(this.mapPathToPixels(path)).catch((reason) => console.warn(reason));
+                    this.player.setPathToFollow(this.mapPathToPixels(path, 0, 32)).catch((reason) => console.warn(reason));
                 }
             })
             .catch((reason) => console.warn(reason));
     }
 
-    private mapPathToPixels(path: { x: number, y: number }[]): { x: number, y: number }[] {
+    private mapPathToPixels(path: { x: number, y: number }[], xOffset = 0, yOffset = 0): { x: number, y: number }[] {
         return path.map((coords) => {
-            const tile = this.getTileAtIndex(coords.x, coords.y);
-            return { x: tile?.pixelX ?? 0, y: tile?.pixelY ?? 0 };
+            const tile = this.mapManager.getFloorTileAt(coords.x, coords.y);
+            return { x: (tile?.pixelX ?? 0) + xOffset, y: (tile?.pixelY  ?? 0) + yOffset };
         });
-    }
-
-    private getTileAtIndex(x: number, y: number): Phaser.Tilemaps.Tile | null {
-        const tile = this.map.getTileAt(x, y, true, this.tilemapLayers.get('floor'));
-        return tile;
-    }
-
-    private getTileIndexAt(x: number, y: number): { x: number; y: number } {
-        const tile = this.map.getTileAtWorldXY(x, y, true, this.cameras.main, this.tilemapLayers.get('floor'));
-        return { x: tile?.x ?? 0, y: tile?.y ?? 0 };
     }
 }

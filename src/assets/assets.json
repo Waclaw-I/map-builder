@@ -12,7 +12,8 @@
         "ballOn": "./images/ballOn.png",
         "ballOff": "./images/ballOff.png",
         "backgroundOn": "./images/backgroundOn.png",
-        "backgroundOff": "./images/backgroundOff.png"
+        "backgroundOff": "./images/backgroundOff.png",
+        "grayWall": "./images/walls/gray.png"
     },
 
     "audio": {

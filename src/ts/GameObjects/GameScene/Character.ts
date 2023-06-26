@@ -26,10 +26,8 @@ export class Character extends Phaser.GameObjects.Container {
         this.diagonalSpeed = speed * Math.sin(Math.PI / 4);
         this.runningDirection = undefined;
 
-        this.sprite = this.scene.add.sprite(0, 0, 'ballOn', 0)
-            // .setOrigin(0.5, 1);
-
-        this.setDepth(10000);
+        this.sprite = this.scene.add.sprite(0, 0, 'characterIdle', 0)
+            .setOrigin(0.5, 0.87);
 
         this.createAnimations();
 
@@ -45,6 +43,7 @@ export class Character extends Phaser.GameObjects.Container {
             const moveBy = this.computeFollowPathMovement();
             this.x += moveBy.x * this.speed;
             this.y += moveBy.y * this.speed;
+            this.setDepth(100 + this.y);
         }
     }
 
@@ -106,6 +105,7 @@ export class Character extends Phaser.GameObjects.Container {
                 break;
             }
         }
+        this.setDepth(100 + this.y);
     }
 
     public finishFollowingPath(cancelled = false): void {
@@ -147,8 +147,8 @@ export class Character extends Phaser.GameObjects.Container {
 
     private addYOffset(path: { x: number; y: number }[]): { x: number; y: number }[] {
         return path.map((step) => {
-            return { x: step.x, y: step.y };
-            // return { x: step.x, y: step.y + 64 };
+            // return { x: step.x, y: step.y };
+            return { x: step.x + 64, y: step.y };
         });
     }
 
@@ -172,6 +172,9 @@ export class Character extends Phaser.GameObjects.Container {
     }
 
     private getMovementDirection(xDistance: number, yDistance: number, distance: number): { x: number, y: number} {
+        if (distance === 0) {
+            return { x: 0, y: 0};
+        }
         return { x: xDistance / Math.sqrt(distance), y: yDistance / Math.sqrt(distance) };
     }
 

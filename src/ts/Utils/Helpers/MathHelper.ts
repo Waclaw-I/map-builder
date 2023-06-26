@@ -47,4 +47,26 @@ export class MathHelper extends HBSMathHelper {
         const distance = Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
         return squared ? Math.sqrt(distance) : distance;
     }
+
+    public static cartesianToIsometric(cartPt: { x: number, y: number }) {
+
+        const tempPt: { x: number, y: number } = { x: 0, y: 0 };
+    
+        tempPt.x = cartPt.x - cartPt.y;
+        tempPt.y = (cartPt.x + cartPt.y) / 2;
+    
+        return tempPt;
+    
+    }
+    
+    public static isometricToCartesian(isoPt: { x: number, y: number }) {
+    
+        const tempPt: { x: number, y: number } = { x: 0, y: 0 };
+    
+        tempPt.x = (2 * isoPt.y + isoPt.x) / 2;
+        tempPt.y = (2 * isoPt.y - isoPt.x) / 2;
+    
+        return tempPt;
+    }
+    
 }
