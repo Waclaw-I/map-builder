@@ -1,21 +1,26 @@
+import { EventsHelper } from './Utils/Helpers/EventsHelper';
 
 export class Gamestate {
 
     private globalEvents: Phaser.Events.EventEmitter;
 
-    private highscore: number;
-    private currentScoreTresholdIndex: number;
+    private mapEditorOn: boolean;
 
     constructor(globalEvents: Phaser.Events.EventEmitter) {
         this.globalEvents = globalEvents;
 
-        this.highscore = 0;
-        this.currentScoreTresholdIndex = 0;
+        this.mapEditorOn = false;
     }
 
-    public setHighscore(score: number): void { this.highscore = score; }
-    public getHighscore(): number { return this.highscore; }
+    public turnMapEditorOn(on: boolean = true): void {
+        if (this.mapEditorOn === on) {
+            return;
+        }
+        this.mapEditorOn = on;
+        this.globalEvents.emit(EventsHelper.events.mapEditor.switched, this.mapEditorOn);
+    }
 
-    public setCurrentScoreTresholdIndex(value: number): void { this.currentScoreTresholdIndex = value; }
-    public getCurrentScoreTresholdIndex(): number { return this.currentScoreTresholdIndex; }
+    public isMapEditorOn(): boolean {
+        return this.mapEditorOn;
+    }
 }

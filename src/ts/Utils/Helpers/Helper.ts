@@ -5,6 +5,7 @@ import { Language } from '../Enums';
 import { Translation } from '../Translations';
 import { ScaleHelper } from './ScaleHelper';
 import { TypesHelper } from './TypesHelper';
+import { Gamestate } from '../../Gamestate';
 
 export class Helper {
 
@@ -48,6 +49,10 @@ export class Helper {
 
     public static getAnalytics(): Analytics {
         return Helper.registry.get('analytics');
+    }
+
+    public static getGamestate(): Gamestate {
+        return Helper.registry.get('gamestate') as Gamestate;
     }
 
     public static getPossibleLanguage(): Language | undefined {

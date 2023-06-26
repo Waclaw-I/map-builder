@@ -1,4 +1,14 @@
+import { Wall } from '../GameObjects/GameScene/Wall';
 
+export enum MapManagerEvent {
+    CollisionGridUpdated = 'CollisionGridUpdated',
+}
+
+// NOTE: This could be improved by switching to rxjs. Phaser Events system does not support types for passing data.
+export interface CollisionGridUpdatedEventData {
+    coords: { x: number, y: number };
+    collides: boolean;
+}
 export class MapManager extends Phaser.Events.EventEmitter {
 
     private scene: Phaser.Scene;
@@ -18,6 +28,12 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.initializeMap(mapKey);
         this.initializeWallGrid();
         this.initializeCollisionGrid();
+    }
+
+    public placeWall(coords: { x: number, y: number}): void {
+        new Wall(this.scene, coords);
+        this.updateCollisionGrid(coords.x, coords.y, true);
+        this.emit(MapManagerEvent.CollisionGridUpdated, { coords: coords, collides: true } as CollisionGridUpdatedEventData);
     }
 
     public getFloorTileAtWorldXY(x: number, y: number): Phaser.Tilemaps.Tile | null {

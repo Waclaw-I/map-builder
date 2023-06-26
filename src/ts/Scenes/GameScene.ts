@@ -3,9 +3,10 @@ import { MyScene, ScenesHelper } from '../Utils/Helpers/ScenesHelper';
 import { GlobalConfig } from '../GlobalConfig';
 import { Character, Direction } from '../GameObjects/GameScene/Character';
 import { PathfindingManager } from '../Utils/PathfindingManager';
-import { Wall } from '../GameObjects/GameScene/Wall';
-import { MapManager } from '../Utils/MapManager';
+import { CollisionGridUpdatedEventData, MapManager, MapManagerEvent } from '../Utils/MapManager';
 import { CartesianMapProjection } from '../Utils/CartesianMapProjection';
+import { EventsHelper } from '../Utils/Helpers/EventsHelper';
+import { MapEditor } from '../Utils/MapEditor/MapEditor';
 
 export class GameScene extends SceneTemplate {
 
@@ -19,6 +20,7 @@ export class GameScene extends SceneTemplate {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
 
     private mapManager: MapManager;
+    private mapEditor: MapEditor;
     private mapProjection: CartesianMapProjection;
 
     constructor() {
@@ -36,13 +38,15 @@ export class GameScene extends SceneTemplate {
 
         // TODO: ZOD would be nice here to check if data from JSON is in correct format.
         this.mapManager = new MapManager(this, 'map');
+        this.mapEditor = new MapEditor(this, this.mapManager);
         this.mapProjection = new CartesianMapProjection(
             // NOTE: We pass in UI SCENE, not GAME SCENE. This way we can have our cartesian projection always on top, immovable
             ScenesHelper.getScene(MyScene.UiScene),
             16,
             16,
             {
-                map: this.mapManager.getCollisionGrid(),
+                mapWidth: this.mapManager.getDimensionsInTiles().width,
+                mapHeight: this.mapManager.getDimensionsInTiles().height,
                 tileWidth: this.mapManager.getTileDimensions().width,
                 tileHeight: this.mapManager.getTileDimensions().height,
             },
@@ -63,6 +67,7 @@ export class GameScene extends SceneTemplate {
 
         this.bindEventHandlers();
         this.bindSceneEventHandlers();
+        this.bindGlobalEventHandlers();
     }
 
     public update(time: number, dt: number): void {
@@ -134,16 +139,38 @@ export class GameScene extends SceneTemplate {
             }
             if (pointer.rightButtonDown()) {
                 this.moveTo(coords);
-            } else {
-                new Wall(this, coords);
-                this.mapManager.updateCollisionGrid(coords.x, coords.y, true);
-                this.mapProjection.setWallOnMap(coords.x, coords.y);
+                return;
             }
+        });
+
+        this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+            const key = event.key.toLowerCase();
+            if (key === 'e') {
+                this.gamestate.turnMapEditorOn(!this.gamestate.isMapEditorOn());
+            } else if (this.gamestate.isMapEditorOn()) {
+                this.mapEditor.handleKeyDownEvent(key);
+            }
+        });
+
+        this.mapManager.on(MapManagerEvent.CollisionGridUpdated, (data: CollisionGridUpdatedEventData) => {
+            this.mapProjection.setCollision(data.coords.x, data.coords.y, data.collides);
         });
     }
 
     private bindSceneEventHandlers(): void {
         this.events.once('shutdown', () => {
+        });
+    }
+
+    private bindGlobalEventHandlers(): void {
+        this.globalEvents.on(EventsHelper.events.mapEditor.switched, (on: boolean) => {
+            if (on) {
+                this.cameras.main.stopFollow();
+                this.player.setAlpha(0.5);
+            } else {
+                this.cameras.main.startFollow(this.player);
+                this.player.setAlpha(1);
+            }
         });
     }
 
