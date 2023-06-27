@@ -145,9 +145,17 @@ export class GameScene extends SceneTemplate {
 
         this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
             const key = event.key.toLowerCase();
-            if (key === 'e') {
-                this.gamestate.turnMapEditorOn(!this.gamestate.isMapEditorOn());
-            } else if (this.gamestate.isMapEditorOn()) {
+            switch (key) {
+                case 'e': {
+                    this.gamestate.turnMapEditorOn(!this.gamestate.isMapEditorOn());
+                    break;
+                }
+                case 'h': {
+                    this.mapManager.switchHideWalls();
+                    break;
+                }
+            }
+            if (this.gamestate.isMapEditorOn()) {
                 this.mapEditor.handleKeyDownEvent(key);
             }
         });

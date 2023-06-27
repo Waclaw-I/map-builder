@@ -9,9 +9,9 @@ export class Wall extends Phaser.GameObjects.Image {
 
     private coords: { x: number, y: number };
 
-    constructor(scene: Phaser.Scene, coords: { x: number, y: number}) {
+    constructor(scene: Phaser.Scene, coords: { x: number, y: number}, hidden = false) {
         const isoPosition = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
-        super(scene, isoPosition.x, isoPosition.y, 'grayWall');
+        super(scene, isoPosition.x, isoPosition.y, hidden ? 'grayPlain' : 'grayWall');
 
         this.coords = coords;
 
@@ -25,6 +25,18 @@ export class Wall extends Phaser.GameObjects.Image {
         this.setInteractive({ cursor: 'pointer'});
 
         this.scene.add.existing(this);
+    }
+
+    public hide(hide: boolean): void {
+        hide === true ? this.showAsPlain() : this.showAsWall();
+    }
+
+    private showAsPlain(): void {
+        this.setTexture('grayPlain');
+    }
+
+    private showAsWall(): void {
+        this.setTexture('grayWall');
     }
 
     public getCoords(): { x: number, y: number } {

@@ -50,6 +50,7 @@ export class WallEditorTool extends MapEditorTool {
         this.wallPreview = [];
         this.placementShapeStart = undefined;
         this.placementShapeEnd = undefined;
+        this.mapManager.getAllWalls().forEach(wall => wall.clearTint());
     }
 
     public handleKeyDownEvent(key: string): void {
@@ -73,6 +74,7 @@ export class WallEditorTool extends MapEditorTool {
         switch (mode) {
             case WallEditorToolMode.Placing: {
                 console.log('PLACING MODE');
+                this.mapManager.getAllWalls().forEach(wall => wall.clearTint());
                 this.createChunkPreviewIfNeeded();
                 break;
             }
@@ -107,8 +109,6 @@ export class WallEditorTool extends MapEditorTool {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
                     this.shapeChunkCoords = this.getShapeChunkCoords(this.placementShapeStart, this.placementShapeEnd);
-                    // console.log(this.shapeChunkCoords);
-                    // console.log(`end shape at: ${this.placementShapeEnd?.x}, ${this.placementShapeEnd?.y}`);
 
                     // it would be a nice place to use Object Pool.
                     this.wallPreview.forEach(wallChunk => wallChunk.destroy());
@@ -122,7 +122,8 @@ export class WallEditorTool extends MapEditorTool {
                             'grayWall',
                         )
                             .setOrigin(0.5, 0.5)
-                            .setAlpha(0.5),
+                            .setAlpha(0.5)
+                            .setDepth(1000 + pointer.y),
                         );
                     }
                 }
@@ -160,16 +161,23 @@ export class WallEditorTool extends MapEditorTool {
             if (pointer.rightButtonReleased()) {
                 return;
             }
-            if (this.placementShapeStart && this.placementShapeEnd) {
+            if (this.placementShapeStart) {
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                 this.wallPreview = [];
                 this.createChunkPreviewIfNeeded();
+                
+
+                console.log(this.shapeChunkCoords);
+                console.log(this.placementShapeStart);
+                if (this.shapeChunkCoords.length === 0) {
+                    this.mapManager.placeWall(this.placementShapeStart);
+                } else {
+                    for (const coords of this.shapeChunkCoords) {
+                        this.mapManager.placeWall(coords);
+                    }
+                }
                 this.placementShapeStart = undefined;
                 this.placementShapeEnd = undefined;
-
-                for (const coords of this.shapeChunkCoords) {
-                    this.mapManager.placeWall(coords);
-                }
                 this.shapeChunkCoords = [];
             }
         });
@@ -223,7 +231,11 @@ export class WallEditorTool extends MapEditorTool {
     private createChunkPreviewIfNeeded(): void {
         if (this.wallPreview.length === 0) {
             const pointer = this.scene.input.activePointer;
-            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'grayWall').setOrigin(0.5, 0.5).setAlpha(0.5));
+            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'grayWall')
+                .setOrigin(0.5, 0.5)
+                .setAlpha(0.5)
+                .setDepth(1000 + pointer.y),
+            );
         }
     }
 }

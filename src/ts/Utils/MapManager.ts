@@ -20,43 +20,50 @@ export class MapManager extends Phaser.Events.EventEmitter {
     private tilesets: Map<string, Phaser.Tilemaps.Tileset | null>;
     private tilemapLayers: Map<string, Phaser.Tilemaps.TilemapLayer | undefined>;
 
-    private walls: Wall[];
+    private walls: (Wall | undefined)[][];
+    private wallArray: Wall[];
     private collisionGrid: number[][];
+
+    private wallsHidden: boolean;
 
     constructor(scene: Phaser.Scene, mapKey: string) {
         super();
 
         this.scene = scene;
 
-        this.initializeMap(mapKey);
-        this.initializeCollisionGrid();
+        this.wallsHidden = false;
 
-        this.walls = [];
+        this.initializeMap(mapKey);
+        this.initializeWalls();
+        this.initializeCollisionGrid();
     }
 
     public placeWall(coords: { x: number, y: number}): void {
-        const wall = new Wall(this.scene, coords);
+        const wall = new Wall(this.scene, coords, this.wallsHidden);
         wall.place();
-        this.walls.push(wall);
+        const spot = this.walls[coords.y][coords.x];
+        if (spot !== undefined) {
+            this.removeWall(spot);
+        }
+        this.walls[coords.y][coords.x] = wall;
+        this.wallArray.push(wall);
         this.updateCollisionGrid(coords.x, coords.y, true);
 
         this.bindWallEventHandlers(wall);
     }
 
     public removeWall(wall: Wall): boolean {
-        const wallIndex = this.walls.indexOf(wall);
-        if (wallIndex === -1) {
-            return false;
+
+        const index = this.wallArray.indexOf(wall);
+        if (index !== -1) {
+            this.wallArray.splice(index, 1);
         }
-        this.walls.splice(wallIndex, 1);
+
         const coords = wall.getCoords();
         this.updateCollisionGrid(coords.x, coords.y, false);
-        wall.destroy();
+        this.walls[coords.y][coords.x]?.destroy();
+        this.walls[coords.y][coords.x] = undefined;
         return true;
-    }
-
-    public getWalls(): Wall[] {
-        return this.walls;
     }
 
     public getFloorTileAtWorldXY(x: number, y: number): Phaser.Tilemaps.Tile | null {
@@ -100,15 +107,21 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     public updateCollisionGrid(x: number, y: number, collides: boolean): void {
-        console.log('D1');
         if (x >= this.map.width || y >= this.map.height) {
             console.warn('COLLISION GRID TILE OUT OF BOUNDS');
             return;
         }
         this.collisionGrid[y][x] = collides ? 1 : 0;
-        console.log(collides);
-        console.log(x, y);
         this.emit(MapManagerEvent.CollisionGridUpdated, { coords: { x, y }, collides } as CollisionGridUpdatedEventData);
+    }
+
+    public getAllWalls(): Wall[] {
+        return this.wallArray;
+    }
+
+    public switchHideWalls(): void {
+        this.wallsHidden = !this.wallsHidden;
+        this.wallArray.forEach(wall => wall.hide(this.wallsHidden));
     }
 
     private initializeMap(mapKey: string): void {
@@ -123,6 +136,12 @@ export class MapManager extends Phaser.Events.EventEmitter {
         if (floorBrick) {
             this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick ])?.setCullPadding(4, 4));
         }
+    }
+
+    private initializeWalls(): void {
+        this.wallArray = [];
+        const floorLayer = this.map.getLayer('floor');
+        this.walls = floorLayer?.data.map((row) => row.map(() => undefined)) ?? [];
     }
 
     private initializeCollisionGrid(): void {

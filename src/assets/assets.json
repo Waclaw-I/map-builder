@@ -13,7 +13,8 @@
         "ballOff": "./images/ballOff.png",
         "backgroundOn": "./images/backgroundOn.png",
         "backgroundOff": "./images/backgroundOff.png",
-        "grayWall": "./images/walls/gray.png"
+        "grayWall": "./images/walls/grayWall.png",
+        "grayPlain": "./images/walls/grayPlain.png"
     },
 
     "audio": {
