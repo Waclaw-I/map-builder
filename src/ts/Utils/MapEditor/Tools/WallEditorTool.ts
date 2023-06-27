@@ -79,7 +79,7 @@ export class WallEditorTool extends MapEditorTool {
                 break;
             }
             case WallEditorToolMode.Deleting: {
-                console.log('DELETING MODE');
+                console.log('DELETE MODE');
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                 this.wallPreview = [];
                 this.placementShapeStart = undefined;

@@ -6,7 +6,6 @@ import { UiScene } from '../../Scenes/UiScene';
 import { ResizableScene } from '../../Scenes/ResizableScene';
 import { PopupType } from '../Factories/PopupFactory';
 import { EventsHelper } from './EventsHelper';
-import { HBSLogoScene } from '../../Scenes/HBSLogoScene';
 
 // NOTE: Ignoring Boot, Sound and Load scenes due to their singular purpose.
 // NOTE: 'Scenes' is a Phaser namespace, thus prefix 'My' was needed.
@@ -20,7 +19,6 @@ export class ScenesHelper {
     public static getScenesForPhaser(): Array<typeof Phaser.Scene> {
         return [
             BootScene,
-            HBSLogoScene,
             LoadScene,
             PopupScene,
             GameScene,

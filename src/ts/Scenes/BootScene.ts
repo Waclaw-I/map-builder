@@ -24,7 +24,6 @@ export class BootScene extends Phaser.Scene {
         });
 
         this.load.json('assets', '../../assets/assets.json');
-        this.load.image('hbsLogo', '../../assets/images/hbsLogo.png');
 
         Helper.registry = this.registry;
         TexturesHelper.initialize(this.textures);
@@ -32,8 +31,8 @@ export class BootScene extends Phaser.Scene {
         this.registry.set('gamestate', new Gamestate(this.sys.game.events));
     }
 
-    public create(): void { 
-        this.scene.start(GlobalConfig.GAME_CONFIG.showHBSLogo ? 'HBSLogoScene' : 'LoadScene');
+    public create(): void {
+        this.scene.start('LoadScene');
     }
 
     private initializeTranslation(language?: string): void {

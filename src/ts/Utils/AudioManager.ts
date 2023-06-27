@@ -1,11 +1,8 @@
-import { Helper } from '../Utils/Helpers/Helper';
 
 export enum Sound {
-    Sample = 'sample',
 }
 
 export enum Music {
-    Music = 'music',
 }
 
 type WebAudioSound = Phaser.Sound.WebAudioSound;
@@ -30,18 +27,16 @@ export class AudioManager {
         // delay?:  number  | Time, in seconds, that should elapse before the sound actually starts its playback.
 
         const soundKeys: Map<Sound, Phaser.Types.Sound.SoundConfig> = new Map<Sound, Phaser.Types.Sound.SoundConfig>();
-        soundKeys.set(Sound.Sample, { volume: 0.7 });
 
         const musicKeys: Map<Music, Phaser.Types.Sound.SoundConfig> = new Map<Music, Phaser.Types.Sound.SoundConfig>();
-        musicKeys.set(Music.Music, { volume: 0.3, loop: true });
 
-        for (const [ key, config ] of soundKeys) {
-            this.sounds.set(key, scene.sound.add(key, config) as WebAudioSound);
-        }
+        // for (const [ key, config ] of soundKeys) {
+        //     this.sounds.set(key, scene.sound.add(key, config) as WebAudioSound);
+        // }
 
-        for (const [ key, config ] of musicKeys) {
-            this.music.set(key, scene.sound.add(key, config) as WebAudioSound);
-        }
+        // for (const [ key, config ] of musicKeys) {
+        //     this.music.set(key, scene.sound.add(key, config) as WebAudioSound);
+        // }
     }
 
     public static playSound(key: Sound): void {
