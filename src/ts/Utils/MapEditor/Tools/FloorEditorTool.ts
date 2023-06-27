@@ -19,4 +19,17 @@ export class FloorEditorTool extends MapEditorTool {
     public activate(activate: boolean): void {
         this.active = activate;
     }
+
+    public handleKeyDownEvent(key: string): void {
+        // switch (key) {
+        //     case '1': {
+        //         this.setMode(WallEditorToolMode.Placing);
+        //         break;
+        //     }
+        //     case '2': {
+        //         this.setMode(WallEditorToolMode.Deleting);
+        //         break;
+        //     }
+        // }
+    }
 }

@@ -31,7 +31,8 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     public placeWall(coords: { x: number, y: number}): void {
-        new Wall(this.scene, coords);
+        const wall = new Wall(this.scene, coords);
+        wall.place();
         this.updateCollisionGrid(coords.x, coords.y, true);
         this.emit(MapManagerEvent.CollisionGridUpdated, { coords: coords, collides: true } as CollisionGridUpdatedEventData);
     }

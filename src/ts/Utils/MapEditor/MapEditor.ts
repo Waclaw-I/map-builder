@@ -32,11 +32,10 @@ export class MapEditor extends Phaser.Events.EventEmitter {
             [MapEditorToolName.WallEditor]: new WallEditorTool(this.scene, this.mapManager),
             [MapEditorToolName.FloorEditor]: new FloorEditorTool(this.scene, this.mapManager),
         };
-
-        this.bindEventHandlers();
     }
 
     public handleKeyDownEvent(key: string): void {
+        this.currentlyActiveTool?.handleKeyDownEvent(key);
         switch (key) {
             case 'w': {
                 this.equipTool(MapEditorToolName.WallEditor);
@@ -60,21 +59,6 @@ export class MapEditor extends Phaser.Events.EventEmitter {
         if (tool !== undefined) {
             this.currentlyActiveTool?.activate(true);
         }
-    }
-
-    private bindEventHandlers(): void {
-        this.scene.input.keyboard?.on(`${Phaser.Input.Keyboard.KeyCodes.ONE}`, () => {
-        });
-        this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-            if (!this.gamestate.isMapEditorOn()) {
-                return;
-            }
-            const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
-            if (coords === undefined) {
-                return;
-            }
-            this.mapManager.placeWall(coords);
-        });
     }
 
     private get currentlyActiveTool(): MapEditorTool | undefined {
