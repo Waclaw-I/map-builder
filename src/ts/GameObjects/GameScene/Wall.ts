@@ -7,9 +7,13 @@ export class Wall extends Phaser.GameObjects.Image {
     private readonly offsetX = 128;
     private readonly offsetY = 64;
 
+    private coords: { x: number, y: number };
+
     constructor(scene: Phaser.Scene, coords: { x: number, y: number}) {
         const isoPosition = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
         super(scene, isoPosition.x, isoPosition.y, 'grayWall');
+
+        this.coords = coords;
 
         this.x -= this.displayWidth * 0.5;
         this.y -= this.displayHeight * 0.5;
@@ -18,7 +22,13 @@ export class Wall extends Phaser.GameObjects.Image {
         // TODO: Calculate this offset the right way, pretty please.
         this.setDepth(100 + this.y + this.offsetY + 50);
 
+        this.setInteractive({ cursor: 'pointer'});
+
         this.scene.add.existing(this);
+    }
+
+    public getCoords(): { x: number, y: number } {
+        return this.coords;
     }
 
     public place(): void {

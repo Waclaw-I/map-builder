@@ -2,6 +2,9 @@ import { Wall } from '../GameObjects/GameScene/Wall';
 
 export enum MapManagerEvent {
     CollisionGridUpdated = 'CollisionGridUpdated',
+    WallPointedOver = 'WallPointedOver',
+    WallPointedOut = 'WallPointedOut',
+    WallPressedDown = 'WallPressedDown',
 }
 
 // NOTE: This could be improved by switching to rxjs. Phaser Events system does not support types for passing data.
@@ -17,7 +20,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
     private tilesets: Map<string, Phaser.Tilemaps.Tileset | null>;
     private tilemapLayers: Map<string, Phaser.Tilemaps.TilemapLayer | undefined>;
 
-    private wallGrid: number[][];
+    private walls: Wall[];
     private collisionGrid: number[][];
 
     constructor(scene: Phaser.Scene, mapKey: string) {
@@ -26,15 +29,34 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.scene = scene;
 
         this.initializeMap(mapKey);
-        this.initializeWallGrid();
         this.initializeCollisionGrid();
+
+        this.walls = [];
     }
 
     public placeWall(coords: { x: number, y: number}): void {
         const wall = new Wall(this.scene, coords);
         wall.place();
+        this.walls.push(wall);
         this.updateCollisionGrid(coords.x, coords.y, true);
-        this.emit(MapManagerEvent.CollisionGridUpdated, { coords: coords, collides: true } as CollisionGridUpdatedEventData);
+
+        this.bindWallEventHandlers(wall);
+    }
+
+    public removeWall(wall: Wall): boolean {
+        const wallIndex = this.walls.indexOf(wall);
+        if (wallIndex === -1) {
+            return false;
+        }
+        this.walls.splice(wallIndex, 1);
+        const coords = wall.getCoords();
+        this.updateCollisionGrid(coords.x, coords.y, false);
+        wall.destroy();
+        return true;
+    }
+
+    public getWalls(): Wall[] {
+        return this.walls;
     }
 
     public getFloorTileAtWorldXY(x: number, y: number): Phaser.Tilemaps.Tile | null {
@@ -78,11 +100,15 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     public updateCollisionGrid(x: number, y: number, collides: boolean): void {
+        console.log('D1');
         if (x >= this.map.width || y >= this.map.height) {
             console.warn('COLLISION GRID TILE OUT OF BOUNDS');
             return;
         }
         this.collisionGrid[y][x] = collides ? 1 : 0;
+        console.log(collides);
+        console.log(x, y);
+        this.emit(MapManagerEvent.CollisionGridUpdated, { coords: { x, y }, collides } as CollisionGridUpdatedEventData);
     }
 
     private initializeMap(mapKey: string): void {
@@ -99,15 +125,20 @@ export class MapManager extends Phaser.Events.EventEmitter {
         }
     }
 
-    private initializeWallGrid(): void {
-        this.wallGrid = new Array<number[]>(this.map.height);
-        for (let j = 0; j < this.map.height; j += 1) {
-            this.wallGrid[j] = new Array<number>(this.map.width).fill(0);
-        }
-    }
-
     private initializeCollisionGrid(): void {
         const floorLayer = this.map.getLayer('floor');
         this.collisionGrid = floorLayer?.data.map((row) => row.map((tile) => tile.index === -1 ? 1 : 0)) ?? [];
+    }
+
+    private bindWallEventHandlers(wall: Wall): void {
+        wall.on(Phaser.Input.Events.POINTER_OVER, () => {
+            this.emit(MapManagerEvent.WallPointedOver, wall);
+        });
+        wall.on(Phaser.Input.Events.POINTER_OUT, () => {
+            this.emit(MapManagerEvent.WallPointedOut, wall);
+        });
+        wall.on(Phaser.Input.Events.POINTER_DOWN, () => {
+            this.emit(MapManagerEvent.WallPressedDown, wall);
+        });
     }
 }

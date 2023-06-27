@@ -34,6 +34,11 @@ export class MapEditor extends Phaser.Events.EventEmitter {
         };
     }
 
+    public clear(): void {
+        this.currentlyActiveTool?.clear();
+        this.equipTool(undefined);
+    }
+
     public handleKeyDownEvent(key: string): void {
         this.currentlyActiveTool?.handleKeyDownEvent(key);
         switch (key) {
@@ -53,11 +58,11 @@ export class MapEditor extends Phaser.Events.EventEmitter {
             return;
         }
         // turn off previous tool
-        this.currentlyActiveTool?.activate(false);
+        this.currentlyActiveTool?.clear();
 
         this.activeToolName = tool;
         if (tool !== undefined) {
-            this.currentlyActiveTool?.activate(true);
+            this.currentlyActiveTool?.activate();
         }
     }
 

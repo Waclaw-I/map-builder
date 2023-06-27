@@ -1,5 +1,6 @@
+import { Wall } from '../../../GameObjects/GameScene/Wall';
 import { MathHelper } from '../../Helpers/MathHelper';
-import { MapManager } from '../../MapManager';
+import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
 
 export enum WallEditorToolMode {
@@ -37,9 +38,18 @@ export class WallEditorTool extends MapEditorTool {
         return this.active;
     }
 
-    public activate(activate: boolean): void {
-        this.active = activate;
+    public activate(): void {
+        this.active = true;
         this.setMode(WallEditorToolMode.Placing);
+        this.createChunkPreviewIfNeeded();
+    }
+
+    public clear(): void {
+        this.active = false;
+        this.wallPreview.forEach(chunk => chunk.destroy());
+        this.wallPreview = [];
+        this.placementShapeStart = undefined;
+        this.placementShapeEnd = undefined;
     }
 
     public handleKeyDownEvent(key: string): void {
@@ -63,13 +73,15 @@ export class WallEditorTool extends MapEditorTool {
         switch (mode) {
             case WallEditorToolMode.Placing: {
                 console.log('PLACING MODE');
-                const pointer = this.scene.input.activePointer;
-                this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'grayWall').setOrigin(0.5, 0.5).setAlpha(0.5));
+                this.createChunkPreviewIfNeeded();
                 break;
             }
             case WallEditorToolMode.Deleting: {
                 console.log('DELETING MODE');
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
+                this.wallPreview = [];
+                this.placementShapeStart = undefined;
+                this.placementShapeEnd = undefined;
                 break;
             }
         }
@@ -78,6 +90,9 @@ export class WallEditorTool extends MapEditorTool {
     private bindEventHandlers(): void {
         this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
             if (!this.active) {
+                return;
+            }
+            if (this.mode !== WallEditorToolMode.Placing) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -113,10 +128,33 @@ export class WallEditorTool extends MapEditorTool {
                 }
             }
 
+            this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: Wall) => {
+                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                    return;
+                }
+                wall.setTint(0xff0000);
+            });
+
+            this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: Wall) => {
+                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                    return;
+                }
+                wall.clearTint();
+            });
+
+            this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: Wall) => {
+                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                    return;
+                }
+                this.mapManager.removeWall(wall);
+            });
         });
         
         this.scene.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
             if (!this.active) {
+                return;
+            }
+            if (this.mode !== WallEditorToolMode.Placing) {
                 return;
             }
             if (pointer.rightButtonReleased()) {
@@ -125,7 +163,7 @@ export class WallEditorTool extends MapEditorTool {
             if (this.placementShapeStart && this.placementShapeEnd) {
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                 this.wallPreview = [];
-                this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'grayWall').setOrigin(0.5, 0.5).setAlpha(0.5));
+                this.createChunkPreviewIfNeeded();
                 this.placementShapeStart = undefined;
                 this.placementShapeEnd = undefined;
 
@@ -138,6 +176,9 @@ export class WallEditorTool extends MapEditorTool {
 
         this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
             if (!this.active) {
+                return;
+            }
+            if (this.mode !== WallEditorToolMode.Placing) {
                 return;
             }
             if (pointer.rightButtonDown()) {
@@ -177,5 +218,12 @@ export class WallEditorTool extends MapEditorTool {
         }
 
         return positions;
+    }
+
+    private createChunkPreviewIfNeeded(): void {
+        if (this.wallPreview.length === 0) {
+            const pointer = this.scene.input.activePointer;
+            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'grayWall').setOrigin(0.5, 0.5).setAlpha(0.5));
+        }
     }
 }

@@ -16,8 +16,12 @@ export class FloorEditorTool extends MapEditorTool {
         return this.active;
     }
 
-    public activate(activate: boolean): void {
-        this.active = activate;
+    public activate(): void {
+        this.active = true;
+    }
+
+    public clear(): void {
+        this.active = false;
     }
 
     public handleKeyDownEvent(key: string): void {

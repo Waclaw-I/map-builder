@@ -170,6 +170,7 @@ export class GameScene extends SceneTemplate {
             } else {
                 this.cameras.main.startFollow(this.player);
                 this.player.setAlpha(1);
+                this.mapEditor.clear();
             }
         });
     }
