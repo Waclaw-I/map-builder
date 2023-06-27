@@ -3,10 +3,12 @@ import { Helper } from '../Helpers/Helper';
 import { MapManager } from '../MapManager';
 import { FloorEditorTool } from './Tools/FloorEditorTool';
 import { MapEditorTool } from './Tools/MapEditorTool';
+import { ThinWallEditorTool } from './Tools/ThinWallEditorTool';
 import { WallEditorTool } from './Tools/WallEditorTool';
 
 export enum MapEditorToolName {
     WallEditor = 'WallEditor',
+    ThinWallEditor = 'ThinWallEditor',
     FloorEditor = 'FloorEditor',
 }
 
@@ -30,6 +32,7 @@ export class MapEditor extends Phaser.Events.EventEmitter {
 
         this.editorTools = {
             [MapEditorToolName.WallEditor]: new WallEditorTool(this.scene, this.mapManager),
+            [MapEditorToolName.ThinWallEditor]: new ThinWallEditorTool(this.scene, this.mapManager),
             [MapEditorToolName.FloorEditor]: new FloorEditorTool(this.scene, this.mapManager),
         };
     }
@@ -44,6 +47,10 @@ export class MapEditor extends Phaser.Events.EventEmitter {
         switch (key) {
             case 'w': {
                 this.equipTool(MapEditorToolName.WallEditor);
+                break;
+            }
+            case 't': {
+                this.equipTool(MapEditorToolName.ThinWallEditor);
                 break;
             }
             case 'f': {

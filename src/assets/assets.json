@@ -1,7 +1,9 @@
 {
     "image": {
         "grayWall": "./images/walls/grayWall.png",
-        "grayPlain": "./images/walls/grayPlain.png"
+        "grayPlain": "./images/walls/grayPlain.png",
+        "thinWall-N": "./images/thinWall/N.png",
+        "thinWall-W": "./images/thinWall/W.png"
     },
 
     "audio": {

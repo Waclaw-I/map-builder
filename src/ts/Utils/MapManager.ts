@@ -1,3 +1,5 @@
+import { ThinWall } from '../GameObjects/GameScene/ThinWall';
+import { Tile, TileEdge } from '../GameObjects/GameScene/Tile';
 import { Wall } from '../GameObjects/GameScene/Wall';
 
 export enum MapManagerEvent {
@@ -26,6 +28,11 @@ export class MapManager extends Phaser.Events.EventEmitter {
 
     private wallsHidden: boolean;
 
+    private thinWallTilesMap: Tile[][];
+    // Each tile can have two walls, on N and W side.
+    private thinWalls: Record<TileEdge, ThinWall | undefined>[][];
+    private thinWallsArray: ThinWall[];
+
     constructor(scene: Phaser.Scene, mapKey: string) {
         super();
 
@@ -34,8 +41,31 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.wallsHidden = false;
 
         this.initializeMap(mapKey);
+        this.initializeThinWallMap();
+        this.initializeThinWalls();
         this.initializeWalls();
         this.initializeCollisionGrid();
+
+
+        // new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.N);
+        // new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.W);
+        // new ThinWall(this.scene, { x: 1, y: 0}, TileEdge.N);
+        // new ThinWall(this.scene, { x: 2, y: 0}, TileEdge.N);
+    }
+
+    public placeThinWall(coords: { x: number, y: number }, edge: TileEdge): void {
+        const wall = new ThinWall(this.scene, coords, edge);
+        wall.place();
+        this.thinWallTilesMap[coords.y][coords.x]?.setEdge(edge, true);
+        const spot = this.thinWalls[coords.y][coords.x][edge];
+        if (spot !== undefined) {
+            this.removeThinWall(spot);
+        }
+        this.thinWalls[coords.y][coords.x][edge] = wall;
+        this.thinWallsArray.push(wall);
+        // this.updateCollisionGrid(coords.x, coords.y, true);
+
+        // this.bindWallEventHandlers(wall);
     }
 
     public placeWall(coords: { x: number, y: number}): void {
@@ -63,6 +93,21 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.updateCollisionGrid(coords.x, coords.y, false);
         this.walls[coords.y][coords.x]?.destroy();
         this.walls[coords.y][coords.x] = undefined;
+        return true;
+    }
+
+    public removeThinWall(wall: ThinWall): boolean {
+
+        const index = this.thinWallsArray.indexOf(wall);
+        if (index !== -1) {
+            this.wallArray.splice(index, 1);
+        }
+
+        const coords = wall.getCoords();
+        const edge = wall.getEdge();
+        // this.updateCollisionGrid(coords.x, coords.y, false);
+        this.thinWalls[coords.y][coords.x][edge]?.destroy();
+        this.thinWalls[coords.y][coords.x][edge] = undefined;
         return true;
     }
 
@@ -119,6 +164,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return this.wallArray;
     }
 
+    public getAllThinWalls(): ThinWall[] {
+        return this.thinWallsArray;
+    }
+
     public switchHideWalls(): void {
         this.wallsHidden = !this.wallsHidden;
         this.wallArray.forEach(wall => wall.hide(this.wallsHidden));
@@ -136,6 +185,22 @@ export class MapManager extends Phaser.Events.EventEmitter {
         if (floorBrick) {
             this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick ])?.setCullPadding(4, 4));
         }
+    }
+
+    private initializeThinWallMap(): void {
+        this.thinWallTilesMap = [];
+        for (let y = 0; y < this.map.height; y++) {
+            this.thinWallTilesMap.push([]);
+            for (let x = 0; x < this.map.width; x++) {
+                this.thinWallTilesMap[y].push(new Tile(x, y));
+            }
+        }
+    }
+
+    private initializeThinWalls(): void {
+        this.thinWallsArray = [];
+        const floorLayer = this.map.getLayer('floor');
+        this.thinWalls = floorLayer?.data.map((row) => row.map(() => { return {[TileEdge.N]: undefined, [TileEdge.W]: undefined}; })) ?? [];
     }
 
     private initializeWalls(): void {
