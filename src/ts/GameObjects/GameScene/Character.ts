@@ -74,9 +74,9 @@ export class Character extends Phaser.GameObjects.Container {
     }
     
     public stopRunningAsPathFollow(): void {
-        // if (this.runningDirection === undefined) {
-        //     return;
-        // }
+        if (this.runningDirection === undefined) {
+            return;
+        }
         this.sprite.anims.stop();
         this.playIdle();
         this.runningDirection = undefined;
@@ -84,7 +84,9 @@ export class Character extends Phaser.GameObjects.Container {
 
     public move(direction: Direction, mapManager: MapManager): void {
         this.currentlyRunningManually = true;
-        this.finishFollowingPath(true);
+        if (this.pathToFollow) {
+            this.finishFollowingPath(true);
+        }
         this.playRun(direction);
         let nextX = this.x;
         let nextY = this.y;
