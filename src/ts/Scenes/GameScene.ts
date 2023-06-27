@@ -23,6 +23,9 @@ export class GameScene extends SceneTemplate {
     private mapEditor: MapEditor;
     private mapProjection: CartesianMapProjection;
 
+    private draggingCamera: boolean;
+    private lastCameraDragPosition: { x: number, y: number };
+
     constructor() {
         super(MyScene.Game);
     }
@@ -35,6 +38,8 @@ export class GameScene extends SceneTemplate {
         this.graphics = this.add.graphics().setDepth(500);
         this.timer = 0;
         this.cursors = this.input.keyboard?.createCursorKeys();
+
+        this.draggingCamera = false;
 
         // TODO: ZOD would be nice here to check if data from JSON is in correct format.
         this.mapManager = new MapManager(this, 'map');
@@ -127,12 +132,26 @@ export class GameScene extends SceneTemplate {
             this.handleScrollWheel(dy);
         });
         this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-            const tile = this.mapManager.getFloorTileAtWorldXY(pointer.worldX, pointer.worldY);
-            if (tile) {
-                // tile.tint = 0xff0000;
+            if (this.gamestate.isMapEditorOn()) {
+                if (!this.draggingCamera) {
+                    return;
+                }
+                const dx = this.lastCameraDragPosition.x - pointer.x;
+                const dy = this.lastCameraDragPosition.y - pointer.y;
+                if (this.gamestate.isMapEditorOn()) {
+                    this.cameras.main.scrollX += dx;
+                    this.cameras.main.scrollY += dy;
+                }
+                this.lastCameraDragPosition = { x: pointer.x, y: pointer.y };
             }
+
         });
         this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+            if (this.gamestate.isMapEditorOn() && pointer.rightButtonDown()) {
+                this.draggingCamera = true;
+                this.lastCameraDragPosition = { x: pointer.x, y: pointer.y};
+                return;
+            }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
             if (coords === undefined) {
                 return;
@@ -141,6 +160,10 @@ export class GameScene extends SceneTemplate {
                 this.moveTo(coords);
                 return;
             }
+        });
+
+        this.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
+            this.draggingCamera = false;
         });
 
         this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {

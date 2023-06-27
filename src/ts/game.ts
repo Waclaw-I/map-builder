@@ -96,7 +96,7 @@ class Game {
                 autoRound: true,
                 parent: gameContainerId,
             },
-            backgroundColor: Color.Black,
+            backgroundColor: 0x33354c,
             disableContextMenu: true,
             audio: {
                 disableWebAudio: false,

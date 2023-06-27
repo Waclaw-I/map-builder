@@ -156,8 +156,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
         wall.on(Phaser.Input.Events.POINTER_OUT, () => {
             this.emit(MapManagerEvent.WallPointedOut, wall);
         });
-        wall.on(Phaser.Input.Events.POINTER_DOWN, () => {
-            this.emit(MapManagerEvent.WallPressedDown, wall);
+        wall.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+            if (pointer.leftButtonDown()) {
+                this.emit(MapManagerEvent.WallPressedDown, wall);
+            }
         });
     }
 }
