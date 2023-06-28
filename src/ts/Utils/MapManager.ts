@@ -140,7 +140,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return this.collisionGrid;
     }
 
-    public isColliding(x: number, y: number): boolean {
+    public isCollidingWithObstacles(x: number, y: number): boolean {
         const coords = this.getFloorTileIndexAtWorldXY(x, y);
         if (coords === undefined) {
             return true;
