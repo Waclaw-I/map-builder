@@ -15,6 +15,8 @@ export class ThinWallEditorTool extends MapEditorTool {
     private mapManager: MapManager;
 
     private wallPreview: Phaser.GameObjects.Image[];
+    // of first element
+    private previewEdge: TileEdge;
 
     private mode: WallEditorToolMode;
 
@@ -28,6 +30,7 @@ export class ThinWallEditorTool extends MapEditorTool {
         this.mapManager = mapManager;
 
         this.wallPreview = [];
+        this.previewEdge = TileEdge.N;
         this.shapeChunkCoordsAndEdges = [];
 
         this.active = false;
@@ -62,6 +65,13 @@ export class ThinWallEditorTool extends MapEditorTool {
             }
             case '2': {
                 this.setMode(WallEditorToolMode.Deleting);
+                break;
+            }
+            case 'r': {
+                this.wallPreview[0]?.destroy();
+                this.wallPreview = [];
+                this.previewEdge = this.previewEdge === TileEdge.N ? TileEdge.W : TileEdge.N;
+                this.createChunkPreviewIfNeeded();
                 break;
             }
         }
@@ -104,8 +114,8 @@ export class ThinWallEditorTool extends MapEditorTool {
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
             if (!this.placementShapeStart) {
-                this.wallPreview[0].x = position.x + 96;
-                this.wallPreview[0].y = position.y - 48;
+                this.wallPreview[0].x = position.x + (this.previewEdge === TileEdge.N ? 96 : 32);
+                this.wallPreview[0].y = position.y - (this.previewEdge === TileEdge.N ? 48 : 48);
             } else {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
@@ -168,7 +178,7 @@ export class ThinWallEditorTool extends MapEditorTool {
                 this.createChunkPreviewIfNeeded();
                 
                 if (this.shapeChunkCoordsAndEdges.length === 0) {
-                    this.mapManager.placeThinWall(this.placementShapeStart, TileEdge.N);
+                    this.mapManager.placeThinWall(this.placementShapeStart, this.previewEdge);
                 } else {
                     for (const chunkData of this.shapeChunkCoordsAndEdges) {
                         this.mapManager.placeThinWall(chunkData.coords, chunkData.edge);
@@ -233,7 +243,8 @@ export class ThinWallEditorTool extends MapEditorTool {
     private createChunkPreviewIfNeeded(): void {
         if (this.wallPreview.length === 0) {
             const pointer = this.scene.input.activePointer;
-            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, 'thinWall-N')
+            console.log(this.previewEdge === TileEdge.N ? 'thinWall-N' : 'thinWall-W');
+            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, this.previewEdge === TileEdge.N ? 'thinWall-N' : 'thinWall-W')
                 .setOrigin(0.5, 0.5)
                 .setAlpha(0.5)
                 .setDepth(1000 + pointer.y),
