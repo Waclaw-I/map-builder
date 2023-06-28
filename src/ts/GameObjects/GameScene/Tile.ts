@@ -22,4 +22,8 @@ export class Tile {
     public setEdge(edge: TileEdge, occupied: boolean) {
         this.edges[edge] = occupied;
     }
+
+    public getEdge(edge: TileEdge): boolean {
+        return this.edges[edge];
+    }
 }

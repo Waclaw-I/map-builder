@@ -128,7 +128,7 @@ export class Character extends Phaser.GameObjects.Container {
                 break;
             }
         }
-        if (!mapManager.isColliding(nextX,nextY)) {
+        if (!mapManager.isCollidingWithThinWalls(this.x, this.y, nextX, nextY)) {
             this.x = nextX;
             this.y = nextY;
             this.setDepth(100 + this.y);

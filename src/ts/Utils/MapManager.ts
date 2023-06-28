@@ -151,6 +151,64 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return this.collisionGrid[coords.y][coords.x] === 0 ? false : true;
     }
 
+    public isCollidingWithThinWalls(currentX: number, currentY: number, nextX: number, nextY: number): boolean {
+        const nextCoords = this.getFloorTileIndexAtWorldXY(nextX, nextY);
+        if (nextCoords === undefined) {
+            return true;
+        }
+        if (nextCoords.x >= this.map.width || nextCoords.y >= this.map.height) {
+            return true;
+        }
+        const currentCoords = this.getFloorTileIndexAtWorldXY(currentX, currentY);
+
+        if (currentCoords === undefined) {
+            return false;
+        }
+
+        console.log(currentCoords, nextCoords);
+
+        // this way we can check if our next movement is crossing the tiles so we can look out for the wall
+
+        // 0 - same tile, 1 - E, -1 - W
+        const directionX = currentCoords.x - nextCoords.x;
+        // 0 - same tile, 1 - N, -1 - S
+        const directionY = currentCoords.y - nextCoords.y;
+
+
+        if (directionX === 0 && directionY === 0) {
+            return false;
+        }
+        const tile = this.thinWallTilesMap[currentCoords.y][currentCoords.x];
+        const nextTile = this.thinWallTilesMap[nextCoords.y][nextCoords.x];
+        // W    N
+        if (directionX === -1 || directionY === 1) {
+            if (directionX === -1 && nextTile.getEdge(TileEdge.W)) {
+                console.log('BLOCKED');
+                return true;
+            }
+            if (directionY === 1 && tile.getEdge(TileEdge.N)) {
+                console.log('BLOCKED');
+                return true;
+            }
+        }
+
+        // for this coordinates we need to check walls of our destination tile
+        // E    S
+        if (directionX === 1 || directionY === -1) {
+            if (directionX === 1 && tile.getEdge(TileEdge.W)) {
+                console.log('BLOCKED');
+                return true;
+            }
+            if (directionY === -1 && nextTile.getEdge(TileEdge.N)) {
+                console.log('BLOCKED');
+                return true;
+            }
+        }
+
+        return false;
+        // return this.collisionGrid[nextCoords.y][nextCoords.x] === 0 ? false : true;
+    }
+
     public updateCollisionGrid(x: number, y: number, collides: boolean): void {
         if (x >= this.map.width || y >= this.map.height) {
             console.warn('COLLISION GRID TILE OUT OF BOUNDS');
