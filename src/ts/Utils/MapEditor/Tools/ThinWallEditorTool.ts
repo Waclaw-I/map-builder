@@ -104,8 +104,8 @@ export class ThinWallEditorTool extends MapEditorTool {
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
             if (!this.placementShapeStart) {
-                this.wallPreview[0].x = position.x + 64;
-                this.wallPreview[0].y = position.y - 24;
+                this.wallPreview[0].x = position.x + 96;
+                this.wallPreview[0].y = position.y - 48;
             } else {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
@@ -118,8 +118,8 @@ export class ThinWallEditorTool extends MapEditorTool {
                     for (const chunkData of this.shapeChunkCoordsAndEdges) {
                         const chunkPos = MathHelper.cartesianToIsometric({ x: chunkData.coords.x * 64, y: chunkData.coords.y * 64 });
                         this.wallPreview.push(this.scene.add.image(
-                            chunkPos.x + 64,
-                            chunkPos.y - 24,
+                            chunkPos.x + (chunkData.edge === TileEdge.N ? 96 : 32),
+                            chunkPos.y - (chunkData.edge === TileEdge.N ? 48 : 48),
                             chunkData.edge === TileEdge.N ? 'thinWall-N' : 'thinWall-W',
                         )
                             .setOrigin(0.5, 0.5)
@@ -167,9 +167,6 @@ export class ThinWallEditorTool extends MapEditorTool {
                 this.wallPreview = [];
                 this.createChunkPreviewIfNeeded();
                 
-
-                console.log(this.shapeChunkCoordsAndEdges);
-                console.log(this.placementShapeStart);
                 if (this.shapeChunkCoordsAndEdges.length === 0) {
                     this.mapManager.placeThinWall(this.placementShapeStart, TileEdge.N);
                 } else {
@@ -211,7 +208,7 @@ export class ThinWallEditorTool extends MapEditorTool {
         const end = { x: Math.max(from.x, to.x), y: Math.max(from.y, to.y) };
         const positions: { coords: { x: number, y: number }, edge: TileEdge }[] = [];
         // horizontal walls
-        for (let x = start.x; x <= end.x; x++) {
+        for (let x = start.x; x < end.x; x++) {
             positions.push({ coords: { x: x, y: start.y }, edge: TileEdge.N });
             // skip checking for second edge if we are placing a line
             if (start.y === end.y) {
@@ -220,8 +217,8 @@ export class ThinWallEditorTool extends MapEditorTool {
             positions.push({ coords: { x: x, y: end.y }, edge: TileEdge.N });
         }
         // vertical walls
-        // edges are already covered by the first loop
-        for (let y = start.y + 1; y < end.y; y++) {
+        // this time we are not skipping the edges as one Tile can have two walls attached to it
+        for (let y = start.y + 0; y < end.y; y++) {
             positions.push({ coords: { x: start.x, y: y }, edge: TileEdge.W });
             // skip checking for second edge if we are placing a line
             if (start.x === end.x) {

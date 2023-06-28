@@ -46,12 +46,13 @@ export class ThinWall extends Phaser.GameObjects.Image {
     private playPlaceAnimation(): void {
         if (this.scene) {
             this.alpha = 0;
+            this.y -= 64;
             this.scene.tweens.add({
                 targets: [ this ],
                 duration: 500,
                 ease: Easing.ExpoEaseOut,
                 alpha: 1,
-                y: `+=${this.offset.y}`,
+                y: `+=${64}`,
             });
         }
     }

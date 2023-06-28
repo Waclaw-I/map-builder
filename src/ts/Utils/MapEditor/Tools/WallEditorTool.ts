@@ -166,9 +166,6 @@ export class WallEditorTool extends MapEditorTool {
                 this.wallPreview = [];
                 this.createChunkPreviewIfNeeded();
                 
-
-                console.log(this.shapeChunkCoords);
-                console.log(this.placementShapeStart);
                 if (this.shapeChunkCoords.length === 0) {
                     this.mapManager.placeWall(this.placementShapeStart);
                 } else {

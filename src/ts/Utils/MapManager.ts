@@ -47,7 +47,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.initializeCollisionGrid();
 
 
-        // new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.N);
+        new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.N);
         // new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.W);
         // new ThinWall(this.scene, { x: 1, y: 0}, TileEdge.N);
         // new ThinWall(this.scene, { x: 2, y: 0}, TileEdge.N);
