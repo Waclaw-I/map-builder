@@ -36,7 +36,6 @@ export function AStar(startCoords: { x: number, y: number }, goalCoords: { x: nu
                 path.unshift(node);
                 node = node.parent;
             }
-            console.log(path);
             return path.map(node => { return { x: node.x, y: node.y}; });
         }
   

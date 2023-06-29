@@ -1,5 +1,5 @@
+import { ThinWall } from '../../../GameObjects/GameScene/ThinWall';
 import { TileEdge } from '../../../GameObjects/GameScene/Tile';
-import { Wall } from '../../../GameObjects/GameScene/Wall';
 import { MathHelper } from '../../Helpers/MathHelper';
 import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
@@ -140,25 +140,25 @@ export class ThinWallEditorTool extends MapEditorTool {
                 }
             }
 
-            this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: Wall) => {
+            this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: ThinWall) => {
                 if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
                     return;
                 }
                 wall.setTint(0xff0000);
             });
 
-            this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: Wall) => {
+            this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: ThinWall) => {
                 if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
                     return;
                 }
                 wall.clearTint();
             });
 
-            this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: Wall) => {
+            this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: ThinWall) => {
                 if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
                     return;
                 }
-                this.mapManager.removeWall(wall);
+                this.mapManager.removeThinWall(wall);
             });
         });
         

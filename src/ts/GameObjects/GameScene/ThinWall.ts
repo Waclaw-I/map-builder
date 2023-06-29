@@ -31,6 +31,18 @@ export class ThinWall extends Phaser.GameObjects.Image {
         this.scene.add.existing(this);
     }
 
+    public hide(hide: boolean): void {
+        hide === true ? this.showAsPlain() : this.showAsWall();
+    }
+
+    private showAsPlain(): void {
+        this.setTexture(`${this.getTexture()}-short`);
+    }
+
+    private showAsWall(): void {
+        this.setTexture(this.getTexture());
+    }
+
     public getCoords(): { x: number, y: number } {
         return this.coords;
     }
@@ -72,5 +84,9 @@ export class ThinWall extends Phaser.GameObjects.Image {
                 };
             }
         }
+    }
+
+    private getTexture(): string {
+        return this.edge === TileEdge.N ? 'thinWall-N' : 'thinWall-W';
     }
 }

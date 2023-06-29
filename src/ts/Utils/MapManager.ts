@@ -57,7 +57,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.thinWalls[coords.y][coords.x][edge] = wall;
         this.thinWallsArray.push(wall);
 
-        // this.bindWallEventHandlers(wall);
+        this.bindWallEventHandlers(wall);
     }
 
     public placeWall(coords: { x: number, y: number}): void {
@@ -214,6 +214,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
     public switchHideWalls(): void {
         this.wallsHidden = !this.wallsHidden;
         this.wallArray.forEach(wall => wall.hide(this.wallsHidden));
+        this.thinWallsArray.forEach(thinWall => thinWall.hide(this.wallsHidden));
     }
 
     private initializeMap(mapKey: string): void {
@@ -222,11 +223,16 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.tilemapLayers = new Map<string, Phaser.Tilemaps.TilemapLayer>();
 
         const floorBrick = this.map.addTilesetImage('floorBrick', 'floorBrick');
+        const grass = this.map.addTilesetImage('grass', 'grass');
+        const ground = this.map.addTilesetImage('ground', 'ground');
 
         this.tilesets.set('floorBrick', floorBrick);
+        this.tilesets.set('ground', ground);
+        this.tilesets.set('grass', grass);
         
-        if (floorBrick) {
-            this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick ])?.setCullPadding(4, 4));
+        if (floorBrick && grass && ground) {
+            this.tilemapLayers.set('underground', this.map.createLayer('underground', [ ground ])?.setCullPadding(4, 4));
+            this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick, grass ])?.setCullPadding(4, 4));
         }
     }
 
@@ -252,7 +258,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.walls = floorLayer?.data.map((row) => row.map(() => undefined)) ?? [];
     }
 
-    private bindWallEventHandlers(wall: Wall): void {
+    private bindWallEventHandlers(wall: Wall | ThinWall): void {
         wall.on(Phaser.Input.Events.POINTER_OVER, () => {
             this.emit(MapManagerEvent.WallPointedOver, wall);
         });
