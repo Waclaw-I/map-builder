@@ -2,15 +2,14 @@ import { SceneTemplate } from './SceneTemplate';
 import { MyScene, ScenesHelper } from '../Utils/Helpers/ScenesHelper';
 import { GlobalConfig } from '../GlobalConfig';
 import { Character, Direction } from '../GameObjects/GameScene/Character';
-import { PathfindingManager } from '../Utils/PathfindingManager';
-import { CollisionGridUpdatedEventData, MapManager, MapManagerEvent } from '../Utils/MapManager';
+import { TilesGridUpdatedEventData, MapManager, MapManagerEvent } from '../Utils/MapManager';
 import { CartesianMapProjection } from '../Utils/CartesianMapProjection';
 import { EventsHelper } from '../Utils/Helpers/EventsHelper';
 import { MapEditor } from '../Utils/MapEditor/MapEditor';
+import { AStar } from '../Utils/AStar/AStar';
 
 export class GameScene extends SceneTemplate {
 
-    private pathFindingManager: PathfindingManager;
     private graphics: Phaser.GameObjects.Graphics;
 
     private player: Character;
@@ -57,12 +56,6 @@ export class GameScene extends SceneTemplate {
             },
         )
             .setAlpha(0.5);
-
-        this.pathFindingManager = new PathfindingManager(
-            this,
-            this.mapManager.getCollisionGrid(),
-            this.mapManager.getTileDimensions(),
-        );
 
         const mapDimensions = this.mapManager.getDimensionsInTiles();
         const spawnTileCoords = { x: Math.floor(mapDimensions.width / 2), y: Math.floor(mapDimensions.height / 2) };
@@ -183,7 +176,7 @@ export class GameScene extends SceneTemplate {
             }
         });
 
-        this.mapManager.on(MapManagerEvent.CollisionGridUpdated, (data: CollisionGridUpdatedEventData) => {
+        this.mapManager.on(MapManagerEvent.CollisionGridUpdated, (data: TilesGridUpdatedEventData) => {
             this.mapProjection.setCollision(data.coords.x, data.coords.y, data.collides);
         });
     }
@@ -211,15 +204,10 @@ export class GameScene extends SceneTemplate {
         if (playerPosition === undefined) {
             return;
         }
-        this.pathFindingManager
-            .findPath(playerPosition, destination, false)
-            .then((path) => {
-                path.shift(); // get rid of the tile that player is already standing on.
-                if (path && path.length > 0) {
-                    this.player.setPathToFollow(this.mapPathToPixels(path, 0, 32)).catch((reason) => console.warn(reason));
-                }
-            })
-            .catch((reason) => console.warn(reason));
+        const path = AStar(playerPosition, destination, this.mapManager.getTiles());
+        if (path) {
+            this.player.setPathToFollow(this.mapPathToPixels(path, 0, 32)).catch((reason) => console.warn(reason));
+        }
     }
 
     private mapPathToPixels(path: { x: number, y: number }[], xOffset = 0, yOffset = 0): { x: number, y: number }[] {

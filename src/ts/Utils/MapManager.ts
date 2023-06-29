@@ -10,7 +10,7 @@ export enum MapManagerEvent {
 }
 
 // NOTE: This could be improved by switching to rxjs. Phaser Events system does not support types for passing data.
-export interface CollisionGridUpdatedEventData {
+export interface TilesGridUpdatedEventData {
     coords: { x: number, y: number };
     collides: boolean;
 }
@@ -22,16 +22,16 @@ export class MapManager extends Phaser.Events.EventEmitter {
     private tilesets: Map<string, Phaser.Tilemaps.Tileset | null>;
     private tilemapLayers: Map<string, Phaser.Tilemaps.TilemapLayer | undefined>;
 
+    private tiles: Tile[][];
+
     private walls: (Wall | undefined)[][];
     private wallArray: Wall[];
-    private collisionGrid: number[][];
-
-    private wallsHidden: boolean;
-
-    private thinWallTilesMap: Tile[][];
     // Each tile can have two walls, on N and W side.
     private thinWalls: Record<TileEdge, ThinWall | undefined>[][];
     private thinWallsArray: ThinWall[];
+
+    private wallsHidden: boolean;
+
 
     constructor(scene: Phaser.Scene, mapKey: string) {
         super();
@@ -44,26 +44,18 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.initializeThinWallMap();
         this.initializeThinWalls();
         this.initializeWalls();
-        this.initializeCollisionGrid();
-
-
-        new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.N);
-        // new ThinWall(this.scene, { x: 0, y: 0}, TileEdge.W);
-        // new ThinWall(this.scene, { x: 1, y: 0}, TileEdge.N);
-        // new ThinWall(this.scene, { x: 2, y: 0}, TileEdge.N);
     }
 
     public placeThinWall(coords: { x: number, y: number }, edge: TileEdge): void {
         const wall = new ThinWall(this.scene, coords, edge);
         wall.place();
-        this.thinWallTilesMap[coords.y][coords.x]?.setEdge(edge, true);
+        this.tiles[coords.y][coords.x]?.setEdge(edge, true);
         const spot = this.thinWalls[coords.y][coords.x][edge];
         if (spot !== undefined) {
             this.removeThinWall(spot);
         }
         this.thinWalls[coords.y][coords.x][edge] = wall;
         this.thinWallsArray.push(wall);
-        // this.updateCollisionGrid(coords.x, coords.y, true);
 
         // this.bindWallEventHandlers(wall);
     }
@@ -77,7 +69,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         }
         this.walls[coords.y][coords.x] = wall;
         this.wallArray.push(wall);
-        this.updateCollisionGrid(coords.x, coords.y, true);
+        this.updateTilesCollision(coords.x, coords.y, true);
 
         this.bindWallEventHandlers(wall);
     }
@@ -90,7 +82,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         }
 
         const coords = wall.getCoords();
-        this.updateCollisionGrid(coords.x, coords.y, false);
+        this.updateTilesCollision(coords.x, coords.y, false);
         this.walls[coords.y][coords.x]?.destroy();
         this.walls[coords.y][coords.x] = undefined;
         return true;
@@ -105,7 +97,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
 
         const coords = wall.getCoords();
         const edge = wall.getEdge();
-        // this.updateCollisionGrid(coords.x, coords.y, false);
+        this.tiles[coords.y][coords.x]?.setEdge(edge, false);
         this.thinWalls[coords.y][coords.x][edge]?.destroy();
         this.thinWalls[coords.y][coords.x][edge] = undefined;
         return true;
@@ -136,10 +128,6 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return { width: this.map.tileWidth, height: this.map.tileHeight };
     }
 
-    public getCollisionGrid(): number[][] {
-        return this.collisionGrid;
-    }
-
     public isCollidingWithObstacles(x: number, y: number): boolean {
         const coords = this.getFloorTileIndexAtWorldXY(x, y);
         if (coords === undefined) {
@@ -148,7 +136,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
         if (coords.x >= this.map.width || coords.y >= this.map.height) {
             return true;
         }
-        return this.collisionGrid[coords.y][coords.x] === 0 ? false : true;
+        return this.tiles[coords.y][coords.x].isColliding();
     }
 
     public isCollidingWithThinWalls(currentX: number, currentY: number, nextX: number, nextY: number): boolean {
@@ -165,8 +153,6 @@ export class MapManager extends Phaser.Events.EventEmitter {
             return false;
         }
 
-        console.log(currentCoords, nextCoords);
-
         // this way we can check if our next movement is crossing the tiles so we can look out for the wall
 
         // 0 - same tile, 1 - E, -1 - W
@@ -178,16 +164,14 @@ export class MapManager extends Phaser.Events.EventEmitter {
         if (directionX === 0 && directionY === 0) {
             return false;
         }
-        const tile = this.thinWallTilesMap[currentCoords.y][currentCoords.x];
-        const nextTile = this.thinWallTilesMap[nextCoords.y][nextCoords.x];
+        const tile = this.tiles[currentCoords.y][currentCoords.x];
+        const nextTile = this.tiles[nextCoords.y][nextCoords.x];
         // W    N
         if (directionX === -1 || directionY === 1) {
             if (directionX === -1 && nextTile.getEdge(TileEdge.W)) {
-                console.log('BLOCKED');
                 return true;
             }
             if (directionY === 1 && tile.getEdge(TileEdge.N)) {
-                console.log('BLOCKED');
                 return true;
             }
         }
@@ -196,30 +180,31 @@ export class MapManager extends Phaser.Events.EventEmitter {
         // E    S
         if (directionX === 1 || directionY === -1) {
             if (directionX === 1 && tile.getEdge(TileEdge.W)) {
-                console.log('BLOCKED');
                 return true;
             }
             if (directionY === -1 && nextTile.getEdge(TileEdge.N)) {
-                console.log('BLOCKED');
                 return true;
             }
         }
 
         return false;
-        // return this.collisionGrid[nextCoords.y][nextCoords.x] === 0 ? false : true;
     }
 
-    public updateCollisionGrid(x: number, y: number, collides: boolean): void {
+    public updateTilesCollision(x: number, y: number, collides: boolean): void {
         if (x >= this.map.width || y >= this.map.height) {
             console.warn('COLLISION GRID TILE OUT OF BOUNDS');
             return;
         }
-        this.collisionGrid[y][x] = collides ? 1 : 0;
-        this.emit(MapManagerEvent.CollisionGridUpdated, { coords: { x, y }, collides } as CollisionGridUpdatedEventData);
+        this.tiles[y][x].setCollides(collides);
+        this.emit(MapManagerEvent.CollisionGridUpdated, { coords: { x, y }, collides } as TilesGridUpdatedEventData);
     }
 
     public getAllWalls(): Wall[] {
         return this.wallArray;
+    }
+
+    public getTiles(): Tile[][] {
+        return this.tiles;
     }
 
     public getAllThinWalls(): ThinWall[] {
@@ -246,11 +231,11 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     private initializeThinWallMap(): void {
-        this.thinWallTilesMap = [];
+        this.tiles = [];
         for (let y = 0; y < this.map.height; y++) {
-            this.thinWallTilesMap.push([]);
+            this.tiles.push([]);
             for (let x = 0; x < this.map.width; x++) {
-                this.thinWallTilesMap[y].push(new Tile(x, y));
+                this.tiles[y].push(new Tile(x, y));
             }
         }
     }
@@ -265,11 +250,6 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.wallArray = [];
         const floorLayer = this.map.getLayer('floor');
         this.walls = floorLayer?.data.map((row) => row.map(() => undefined)) ?? [];
-    }
-
-    private initializeCollisionGrid(): void {
-        const floorLayer = this.map.getLayer('floor');
-        this.collisionGrid = floorLayer?.data.map((row) => row.map((tile) => tile.index === -1 ? 1 : 0)) ?? [];
     }
 
     private bindWallEventHandlers(wall: Wall): void {
