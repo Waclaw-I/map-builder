@@ -25,7 +25,6 @@ export class LoadScene extends Phaser.Scene {
 
         AssetsLoader.loadAssets(this.cache.json.get('assets'), this);
 
-        // this.load.image('bridge', '../../assets/tiled/bridge.png');
         this.load.image('floorWood', '../../assets/tiled/map2Assets/floorWood.png');
         this.load.image('floorBrick', '../../assets/tiled/map2Assets/floorBrick.png');
         this.load.tilemapTiledJSON('map', '../../assets/tiled/map.json');
