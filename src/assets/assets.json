@@ -1,11 +1,7 @@
 {
     "image": {
         "grayWall": "./images/walls/grayWall.png",
-        "grayPlain": "./images/walls/grayPlain.png",
-        "thinWall-N": "./images/thinWall/N.png",
-        "thinWall-W": "./images/thinWall/W.png",
-        "thinWall-N-short": "./images/thinWall/shortN.png",
-        "thinWall-W-short": "./images/thinWall/shortW.png"
+        "grayPlain": "./images/walls/grayPlain.png"
     },
 
     "audio": {
@@ -20,7 +16,10 @@
         "characterRun4": ["./atlases/character/run/4.png", "./atlases/character/run/4.json"],
         "characterRun5": ["./atlases/character/run/5.png", "./atlases/character/run/5.json"],
         "characterRun6": ["./atlases/character/run/6.png", "./atlases/character/run/6.json"],
-        "characterRun7": ["./atlases/character/run/7.png", "./atlases/character/run/7.json"]
+        "characterRun7": ["./atlases/character/run/7.png", "./atlases/character/run/7.json"],
+
+        "thinWall": ["./atlases/thinWalls.png", "./atlases/thinWalls.json"]
+
     },
 
     "bitmapFont": {

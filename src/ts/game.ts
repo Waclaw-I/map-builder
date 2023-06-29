@@ -4,7 +4,6 @@ import * as InputTextPlugin from 'phaser3-rex-plugins/dist/rexinputtextplugin.mi
 
 import { ScenesHelper } from './Utils/Helpers/ScenesHelper';
 import { MathHelper } from '@home-based-studio/phaser3-utils';
-import { Color } from './Utils/Enums';
 import { Resolution, ScaleHelper, ScalingStyle } from './Utils/Helpers/ScaleHelper';
 import { Helper } from './Utils/Helpers/Helper';
 import { GlobalConfig } from './GlobalConfig';
@@ -96,7 +95,8 @@ class Game {
                 autoRound: true,
                 parent: gameContainerId,
             },
-            backgroundColor: 0x33354c,
+            // backgroundColor: 0x87CEEB,
+            transparent: true,
             disableContextMenu: true,
             audio: {
                 disableWebAudio: false,

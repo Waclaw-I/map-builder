@@ -1,4 +1,4 @@
-import { Easing } from '@home-based-studio/phaser3-utils/lib/utils/types/Types';
+import { Easing, KeyFrame } from '@home-based-studio/phaser3-utils/lib/utils/types/Types';
 import { MathHelper } from '../../Utils/Helpers/MathHelper';
 import { TileEdge } from './Tile';
 
@@ -6,13 +6,15 @@ export class ThinWall extends Phaser.GameObjects.Image {
 
     private coords: { x: number, y: number };
     private edge: TileEdge;
+    private textureNumber: number;
 
     private offset: { x: number, y: number };
 
-    constructor(scene: Phaser.Scene, coords: { x: number, y: number}, edge: TileEdge) {
+    constructor(scene: Phaser.Scene, coords: { x: number, y: number}, edge: TileEdge, textureNumber: number) {
         const isoPosition = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
-        super(scene, isoPosition.x, isoPosition.y, edge === TileEdge.N ? 'thinWall-N' : 'thinWall-W');
+        super(scene, isoPosition.x, isoPosition.y, 'thinWall', `normal/${edge === TileEdge.N ? 'N' : 'W'}/${textureNumber}`);
         this.edge = edge;
+        this.textureNumber = textureNumber;
 
         this.coords = coords;
 
@@ -32,15 +34,18 @@ export class ThinWall extends Phaser.GameObjects.Image {
     }
 
     public hide(hide: boolean): void {
-        hide === true ? this.showAsPlain() : this.showAsWall();
+        hide === true ? this.showAsShort() : this.showAsWall();
     }
 
-    private showAsPlain(): void {
-        this.setTexture(`${this.getTexture()}-short`);
+    private showAsShort(): void {
+        const keyFrame = this.getTexture(true);
+        console.log(keyFrame);
+        this.setTexture(keyFrame.key, keyFrame.frame);
     }
 
     private showAsWall(): void {
-        this.setTexture(this.getTexture());
+        const keyFrame = this.getTexture();
+        this.setTexture(keyFrame.key, keyFrame.frame);
     }
 
     public getCoords(): { x: number, y: number } {
@@ -86,7 +91,10 @@ export class ThinWall extends Phaser.GameObjects.Image {
         }
     }
 
-    private getTexture(): string {
-        return this.edge === TileEdge.N ? 'thinWall-N' : 'thinWall-W';
+    private getTexture(short: boolean = false): KeyFrame {
+        return {
+            key: 'thinWall',
+            frame: `${short ? 'short' : 'normal'}/${this.edge === TileEdge.N ? 'N' : 'W'}/${this.textureNumber}`,
+        };
     }
 }

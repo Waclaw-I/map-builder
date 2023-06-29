@@ -1,8 +1,10 @@
+import { KeyFrame } from '@home-based-studio/phaser3-utils';
 import { ThinWall } from '../../../GameObjects/GameScene/ThinWall';
 import { TileEdge } from '../../../GameObjects/GameScene/Tile';
 import { MathHelper } from '../../Helpers/MathHelper';
 import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
+import { GlobalConfig } from '../../../GlobalConfig';
 
 export enum WallEditorToolMode {
     Placing,
@@ -17,6 +19,7 @@ export class ThinWallEditorTool extends MapEditorTool {
     private wallPreview: Phaser.GameObjects.Image[];
     // of first element
     private previewEdge: TileEdge;
+    private selectedTextureNumber: number;
 
     private mode: WallEditorToolMode;
 
@@ -31,6 +34,7 @@ export class ThinWallEditorTool extends MapEditorTool {
 
         this.wallPreview = [];
         this.previewEdge = TileEdge.N;
+        this.selectedTextureNumber = 0;
         this.shapeChunkCoordsAndEdges = [];
 
         this.active = false;
@@ -68,11 +72,13 @@ export class ThinWallEditorTool extends MapEditorTool {
                 break;
             }
             case 'r': {
-                this.wallPreview[0]?.destroy();
-                this.wallPreview = [];
                 this.previewEdge = this.previewEdge === TileEdge.N ? TileEdge.W : TileEdge.N;
                 this.createChunkPreviewIfNeeded();
                 break;
+            }
+            case 'q': {
+                this.nextTexture();
+                this.createChunkPreviewIfNeeded();
             }
         }
     }
@@ -127,10 +133,12 @@ export class ThinWallEditorTool extends MapEditorTool {
 
                     for (const chunkData of this.shapeChunkCoordsAndEdges) {
                         const chunkPos = MathHelper.cartesianToIsometric({ x: chunkData.coords.x * 64, y: chunkData.coords.y * 64 });
+                        const keyFrame = this.getPreviewTexture(chunkData.edge);
                         this.wallPreview.push(this.scene.add.image(
                             chunkPos.x + (chunkData.edge === TileEdge.N ? 96 : 32),
                             chunkPos.y - (chunkData.edge === TileEdge.N ? 48 : 48),
-                            chunkData.edge === TileEdge.N ? 'thinWall-N' : 'thinWall-W',
+                            keyFrame.key,
+                            keyFrame.frame,
                         )
                             .setOrigin(0.5, 0.5)
                             .setAlpha(0.5)
@@ -178,10 +186,10 @@ export class ThinWallEditorTool extends MapEditorTool {
                 this.createChunkPreviewIfNeeded();
                 
                 if (this.shapeChunkCoordsAndEdges.length === 0) {
-                    this.mapManager.placeThinWall(this.placementShapeStart, this.previewEdge);
+                    this.mapManager.placeThinWall(this.placementShapeStart, this.previewEdge, this.selectedTextureNumber);
                 } else {
                     for (const chunkData of this.shapeChunkCoordsAndEdges) {
-                        this.mapManager.placeThinWall(chunkData.coords, chunkData.edge);
+                        this.mapManager.placeThinWall(chunkData.coords, chunkData.edge, this.selectedTextureNumber);
                     }
                 }
                 this.placementShapeStart = undefined;
@@ -241,14 +249,28 @@ export class ThinWallEditorTool extends MapEditorTool {
     }
 
     private createChunkPreviewIfNeeded(): void {
-        if (this.wallPreview.length === 0) {
-            const pointer = this.scene.input.activePointer;
-            console.log(this.previewEdge === TileEdge.N ? 'thinWall-N' : 'thinWall-W');
-            this.wallPreview.push(this.scene.add.image(pointer.x, pointer.y, this.previewEdge === TileEdge.N ? 'thinWall-N' : 'thinWall-W')
-                .setOrigin(0.5, 0.5)
-                .setAlpha(0.5)
-                .setDepth(1000 + pointer.y),
-            );
-        }
+        const oldPosition = this.wallPreview[0] ? { x: this.wallPreview[0].x, y: this.wallPreview[0].y } : undefined;
+        this.wallPreview[0]?.destroy();
+        this.wallPreview = [];
+
+        const keyFrame = this.getPreviewTexture(this.previewEdge);
+        const pointer = this.scene.input.activePointer;
+        const position = oldPosition ?? { x: pointer.x, y: pointer.y };
+        this.wallPreview.push(this.scene.add.image(position.x, position.y, keyFrame.key, keyFrame.frame)
+            .setOrigin(0.5, 0.5)
+            .setAlpha(0.85)
+            .setDepth(1000 + pointer.y),
+        );
+    }
+
+    private getPreviewTexture(edge: TileEdge, short: boolean = false): KeyFrame {
+        return {
+            key: 'thinWall',
+            frame: `${short ? 'short' : 'normal'}/${edge === TileEdge.N ? 'N' : 'W'}/${this.selectedTextureNumber}`,
+        };
+    }
+
+    private nextTexture(): void {
+        this.selectedTextureNumber = ((this.selectedTextureNumber += 1) % GlobalConfig.THIN_WALLS_COUNT);
     }
 }

@@ -46,8 +46,8 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.initializeWalls();
     }
 
-    public placeThinWall(coords: { x: number, y: number }, edge: TileEdge): void {
-        const wall = new ThinWall(this.scene, coords, edge);
+    public placeThinWall(coords: { x: number, y: number }, edge: TileEdge, textureNumber: number): void {
+        const wall = new ThinWall(this.scene, coords, edge, textureNumber);
         wall.place();
         this.tiles[coords.y][coords.x]?.setEdge(edge, true);
         const spot = this.thinWalls[coords.y][coords.x][edge];
@@ -81,6 +81,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
             this.wallArray.splice(index, 1);
         }
 
+        wall.off(Phaser.Input.Events.POINTER_OVER);
+        wall.off(Phaser.Input.Events.POINTER_OUT);
+        wall.off(Phaser.Input.Events.POINTER_DOWN);
+
         const coords = wall.getCoords();
         this.updateTilesCollision(coords.x, coords.y, false);
         this.walls[coords.y][coords.x]?.destroy();
@@ -94,6 +98,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
         if (index !== -1) {
             this.wallArray.splice(index, 1);
         }
+
+        wall.off(Phaser.Input.Events.POINTER_OVER);
+        wall.off(Phaser.Input.Events.POINTER_OUT);
+        wall.off(Phaser.Input.Events.POINTER_DOWN);
 
         const coords = wall.getCoords();
         const edge = wall.getEdge();
@@ -232,7 +240,8 @@ export class MapManager extends Phaser.Events.EventEmitter {
         
         if (floorBrick && grass && ground) {
             this.tilemapLayers.set('underground', this.map.createLayer('underground', [ ground ])?.setCullPadding(4, 4));
-            this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick, grass ])?.setCullPadding(4, 4));
+            this.tilemapLayers.set('grass', this.map.createLayer('grass', [ grass ])?.setCullPadding(4, 4));
+            this.tilemapLayers.set('floor', this.map.createLayer('floor', [ floorBrick ])?.setCullPadding(4, 4));
         }
     }
 

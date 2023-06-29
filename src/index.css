@@ -1,0 +1,11 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    background-color: #87CEEB;
+    background-image: url("./assets/images/background/clouds.png");
+    /* background-image: url("https://img.itch.zone/aW1nLzM5MTE1NDIucG5n/original/nKMFW3.png"); */
+}

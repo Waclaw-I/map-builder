@@ -7,6 +7,8 @@ import { CartesianMapProjection } from '../Utils/CartesianMapProjection';
 import { EventsHelper } from '../Utils/Helpers/EventsHelper';
 import { MapEditor } from '../Utils/MapEditor/MapEditor';
 import { AStar } from '../Utils/AStar/AStar';
+import { ScaleHelper } from '../Utils/Helpers/ScaleHelper';
+import { Helper } from '../Utils/Helpers/Helper';
 
 export class GameScene extends SceneTemplate {
 
@@ -34,7 +36,6 @@ export class GameScene extends SceneTemplate {
     }
 
     public create(): void {
-        this.graphics = this.add.graphics().setDepth(500);
         this.timer = 0;
         this.cursors = this.input.keyboard?.createCursorKeys();
 
@@ -66,6 +67,10 @@ export class GameScene extends SceneTemplate {
         this.bindEventHandlers();
         this.bindSceneEventHandlers();
         this.bindGlobalEventHandlers();
+
+        // one manual resize event to make sure our canvas is streched as far as possible
+        ScaleHelper.updateWorldDimensions(this.game.scale);
+        ScenesHelper.resizeScenes(Helper.gameRatio());
     }
 
     public update(time: number, dt: number): void {
@@ -76,8 +81,6 @@ export class GameScene extends SceneTemplate {
             this.mapProjection.updatePlayerPosition(this.player.x, this.player.y);
             this.timer -= GlobalConfig.TICK_DURATION;
         }
-        this.graphics.clear();
-        this.graphics.fillStyle(0xff0000).fillCircle(this.player.x, this.player.y, 5);
     }
 
     // TODO: ADD THIS TO THE REGISTRY, DECOUPLE MAP MANAGER FROM THE SCENE ENTIRELY, DIVIDE INTO LOGIC AND RENDER
@@ -168,6 +171,10 @@ export class GameScene extends SceneTemplate {
                 }
                 case 'h': {
                     this.mapManager.switchHideWalls();
+                    break;
+                }
+                case 'm': {
+                    this.mapProjection.setVisible(!this.mapProjection.visible);
                     break;
                 }
             }
