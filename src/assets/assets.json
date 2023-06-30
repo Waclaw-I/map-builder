@@ -18,7 +18,9 @@
         "characterRun6": ["./atlases/character/run/6.png", "./atlases/character/run/6.json"],
         "characterRun7": ["./atlases/character/run/7.png", "./atlases/character/run/7.json"],
 
-        "thinWall": ["./atlases/thinWalls.png", "./atlases/thinWalls.json"]
+        "thinWall": ["./atlases/thinWalls.png", "./atlases/thinWalls.json"],
+        "floorAtlas": ["./atlases/floorBrick.png", "./atlases/floorBrick.json"],
+        "furnitures": ["./atlases/furnitures.png", "./atlases/furnitures.json"]
 
     },
 

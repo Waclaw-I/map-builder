@@ -17,6 +17,8 @@ export class GlobalConfig {
     public static readonly MIN_ZOOM = 0.3;
     public static readonly MAX_ZOOM = 2;
     public static readonly THIN_WALLS_COUNT = 5;
+    public static readonly FLOOR_COUNT = 17;
+    public static readonly FURNITURES_COUNT = 4;
 
     public static readonly HOMEPAGE_URL = 'https://www.facebook.com/Home-based-Studio-106555638161522';
     public static readonly HOME_BASED_STUDIO_URL = 'https://home-based.studio';

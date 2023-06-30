@@ -38,12 +38,18 @@ export class ThinWall extends Phaser.GameObjects.Image {
     }
 
     private showAsShort(): void {
+        if (!this.scene) {
+            return;
+        }
         const keyFrame = this.getTexture(true);
         console.log(keyFrame);
         this.setTexture(keyFrame.key, keyFrame.frame);
     }
 
     private showAsWall(): void {
+        if (!this.scene) {
+            return;
+        }
         const keyFrame = this.getTexture();
         this.setTexture(keyFrame.key, keyFrame.frame);
     }
