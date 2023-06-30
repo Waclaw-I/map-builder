@@ -7,6 +7,11 @@ import { MapEditorTool } from './Tools/MapEditorTool';
 import { ThinWallEditorTool } from './Tools/ThinWallEditorTool';
 import { WallEditorTool } from './Tools/WallEditorTool';
 
+export enum ToolMode {
+    Placing,
+    Deleting,
+}
+
 export enum MapEditorToolName {
     WallEditor = 'WallEditor',
     ThinWallEditor = 'ThinWallEditor',

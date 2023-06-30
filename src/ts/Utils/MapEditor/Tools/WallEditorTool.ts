@@ -1,22 +1,17 @@
 import { Wall } from '../../../GameObjects/GameScene/Wall';
 import { MathHelper } from '../../Helpers/MathHelper';
 import { MapManager, MapManagerEvent } from '../../MapManager';
+import { ToolMode } from '../MapEditor';
 import { MapEditorTool } from './MapEditorTool';
-
-export enum WallEditorToolMode {
-    Placing,
-    Deleting,
-}
 
 export class WallEditorTool extends MapEditorTool {
 
     private scene: Phaser.Scene;
     private mapManager: MapManager;
-
+    
+    private mode: ToolMode;
+    
     private wallPreview: Phaser.GameObjects.Image[];
-
-    private mode: WallEditorToolMode;
-
     private placementShapeStart?: { x: number, y: number };
     private placementShapeEnd?: { x: number, y: number };
     private shapeChunkCoords: { x: number, y: number }[];
@@ -40,7 +35,7 @@ export class WallEditorTool extends MapEditorTool {
 
     public activate(): void {
         this.active = true;
-        this.setMode(WallEditorToolMode.Placing);
+        this.setMode(ToolMode.Placing);
         this.createChunkPreviewIfNeeded();
     }
 
@@ -56,30 +51,28 @@ export class WallEditorTool extends MapEditorTool {
     public handleKeyDownEvent(key: string): void {
         switch (key) {
             case 'q': {
-                this.setMode(WallEditorToolMode.Placing);
+                this.setMode(ToolMode.Placing);
                 break;
             }
             case 'w': {
-                this.setMode(WallEditorToolMode.Deleting);
+                this.setMode(ToolMode.Deleting);
                 break;
             }
         }
     }
 
-    private setMode(mode: WallEditorToolMode): void {
+    private setMode(mode: ToolMode): void {
         if (this.mode === mode) {
             return;
         }
         this.mode = mode;
         switch (mode) {
-            case WallEditorToolMode.Placing: {
-                console.log('PLACING MODE');
+            case ToolMode.Placing: {
                 this.mapManager.getAllWalls().forEach(wall => wall.clearTint());
                 this.createChunkPreviewIfNeeded();
                 break;
             }
-            case WallEditorToolMode.Deleting: {
-                console.log('DELETE MODE');
+            case ToolMode.Deleting: {
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                 this.wallPreview = [];
                 this.placementShapeStart = undefined;
@@ -91,10 +84,7 @@ export class WallEditorTool extends MapEditorTool {
 
     private bindEventHandlers(): void {
         this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== WallEditorToolMode.Placing) {
+            if (!this.active || this.mode !== ToolMode.Placing) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -102,23 +92,24 @@ export class WallEditorTool extends MapEditorTool {
                 return;
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
+            const offset = { x: 64, y: -24 };
             if (!this.placementShapeStart) {
-                this.wallPreview[0].x = position.x + 64;
-                this.wallPreview[0].y = position.y - 24;
+                this.wallPreview[0].x = position.x + offset.x;
+                this.wallPreview[0].y = position.y + offset.y;
             } else {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
                     this.shapeChunkCoords = this.getShapeChunkCoords(this.placementShapeStart, this.placementShapeEnd);
 
-                    // it would be a nice place to use Object Pool.
+                    // TODO: Objects Pool
                     this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                     this.wallPreview = [];
 
                     for (const chunkCoords of this.shapeChunkCoords) {
                         const chunkPos = MathHelper.cartesianToIsometric({ x: chunkCoords.x * 64, y: chunkCoords.y * 64 });
                         this.wallPreview.push(this.scene.add.image(
-                            chunkPos.x + 64,
-                            chunkPos.y - 24,
+                            chunkPos.x + offset.x,
+                            chunkPos.y + offset.y,
                             'grayWall',
                         )
                             .setOrigin(0.5, 0.5)
@@ -130,21 +121,21 @@ export class WallEditorTool extends MapEditorTool {
             }
 
             this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: Wall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 wall.setTint(0xff0000);
             });
 
             this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: Wall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 wall.clearTint();
             });
 
             this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: Wall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 this.mapManager.removeWall(wall);
@@ -152,13 +143,7 @@ export class WallEditorTool extends MapEditorTool {
         });
         
         this.scene.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== WallEditorToolMode.Placing) {
-                return;
-            }
-            if (pointer.rightButtonReleased()) {
+            if (!this.active || this.mode !== ToolMode.Placing || pointer.rightButtonReleased()) {
                 return;
             }
             if (this.placementShapeStart) {
@@ -180,13 +165,7 @@ export class WallEditorTool extends MapEditorTool {
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== WallEditorToolMode.Placing) {
-                return;
-            }
-            if (pointer.rightButtonDown()) {
+            if (!this.active || this.mode !== ToolMode.Placing || pointer.rightButtonDown()) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -194,7 +173,6 @@ export class WallEditorTool extends MapEditorTool {
                 return;
             }
             this.placementShapeStart = coords;
-            console.log(`start shape at: ${this.placementShapeStart?.x}, ${this.placementShapeStart?.y}`);
         });
     }
 

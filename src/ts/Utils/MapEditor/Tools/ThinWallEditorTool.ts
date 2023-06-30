@@ -5,24 +5,18 @@ import { MathHelper } from '../../Helpers/MathHelper';
 import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
 import { GlobalConfig } from '../../../GlobalConfig';
-
-export enum WallEditorToolMode {
-    Placing,
-    Deleting,
-}
+import { ToolMode } from '../MapEditor';
 
 export class ThinWallEditorTool extends MapEditorTool {
 
     private scene: Phaser.Scene;
     private mapManager: MapManager;
 
-    private wallPreview: Phaser.GameObjects.Image[];
-    // of first element
-    private previewEdge: TileEdge;
+    private mode: ToolMode;
     private selectedTextureNumber: number;
 
-    private mode: WallEditorToolMode;
-
+    private wallPreview: Phaser.GameObjects.Image[];
+    private previewEdge: TileEdge;
     private placementShapeStart?: { x: number, y: number };
     private placementShapeEnd?: { x: number, y: number };
     private shapeChunkCoordsAndEdges: { coords: { x: number, y: number }, edge: TileEdge }[];
@@ -48,12 +42,13 @@ export class ThinWallEditorTool extends MapEditorTool {
 
     public activate(): void {
         this.active = true;
-        this.setMode(WallEditorToolMode.Placing);
+        this.setMode(ToolMode.Placing);
         this.createChunkPreviewIfNeeded();
     }
 
     public clear(): void {
         this.active = false;
+        // TODO: Objects Pool
         this.wallPreview.forEach(chunk => chunk.destroy());
         this.wallPreview = [];
         this.placementShapeStart = undefined;
@@ -64,11 +59,11 @@ export class ThinWallEditorTool extends MapEditorTool {
     public handleKeyDownEvent(key: string): void {
         switch (key) {
             case 'q': {
-                this.setMode(WallEditorToolMode.Placing);
+                this.setMode(ToolMode.Placing);
                 break;
             }
             case 'w': {
-                this.setMode(WallEditorToolMode.Deleting);
+                this.setMode(ToolMode.Deleting);
                 break;
             }
             case 'e': {
@@ -84,20 +79,18 @@ export class ThinWallEditorTool extends MapEditorTool {
         }
     }
 
-    private setMode(mode: WallEditorToolMode): void {
+    private setMode(mode: ToolMode): void {
         if (this.mode === mode) {
             return;
         }
         this.mode = mode;
         switch (mode) {
-            case WallEditorToolMode.Placing: {
-                console.log('PLACING MODE');
-                // this.mapManager.getAllWalls().forEach(wall => wall.clearTint());
+            case ToolMode.Placing: {
+                this.mapManager.getAllThinWalls().forEach(wall => wall.clearTint());
                 this.createChunkPreviewIfNeeded();
                 break;
             }
-            case WallEditorToolMode.Deleting: {
-                console.log('DELETE MODE');
+            case ToolMode.Deleting: {
                 this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                 this.wallPreview = [];
                 this.placementShapeStart = undefined;
@@ -109,10 +102,7 @@ export class ThinWallEditorTool extends MapEditorTool {
 
     private bindEventHandlers(): void {
         this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== WallEditorToolMode.Placing) {
+            if (!this.active || this.mode !== ToolMode.Placing) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -121,23 +111,25 @@ export class ThinWallEditorTool extends MapEditorTool {
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
             if (!this.placementShapeStart) {
-                this.wallPreview[0].x = position.x + (this.previewEdge === TileEdge.N ? 96 : 32);
-                this.wallPreview[0].y = position.y - (this.previewEdge === TileEdge.N ? 48 : 48);
+                const offset = this.getOffset(this.previewEdge);
+                this.wallPreview[0].x = position.x + offset.x;
+                this.wallPreview[0].y = position.y - offset.y;
             } else {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
                     this.shapeChunkCoordsAndEdges = this.getShapeChunkCoordsAndEdge(this.placementShapeStart, this.placementShapeEnd);
 
-                    // it would be a nice place to use Object Pool.
+                    // TODO: Objects Pool
                     this.wallPreview.forEach(wallChunk => wallChunk.destroy());
                     this.wallPreview = [];
 
                     for (const chunkData of this.shapeChunkCoordsAndEdges) {
                         const chunkPos = MathHelper.cartesianToIsometric({ x: chunkData.coords.x * 64, y: chunkData.coords.y * 64 });
                         const keyFrame = this.getPreviewTexture(chunkData.edge);
+                        const offset = this.getOffset(this.previewEdge);
                         this.wallPreview.push(this.scene.add.image(
-                            chunkPos.x + (chunkData.edge === TileEdge.N ? 96 : 32),
-                            chunkPos.y - (chunkData.edge === TileEdge.N ? 48 : 48),
+                            chunkPos.x + offset.x,
+                            chunkPos.y - offset.y,
                             keyFrame.key,
                             keyFrame.frame,
                         )
@@ -150,21 +142,21 @@ export class ThinWallEditorTool extends MapEditorTool {
             }
 
             this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: ThinWall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 wall.setTint(0xff0000);
             });
 
             this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: ThinWall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 wall.clearTint();
             });
 
             this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: ThinWall) => {
-                if (!this.active || this.mode !== WallEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 this.mapManager.removeThinWall(wall);
@@ -175,7 +167,7 @@ export class ThinWallEditorTool extends MapEditorTool {
             if (!this.active) {
                 return;
             }
-            if (this.mode !== WallEditorToolMode.Placing) {
+            if (this.mode !== ToolMode.Placing) {
                 return;
             }
             if (pointer.rightButtonReleased()) {
@@ -203,7 +195,7 @@ export class ThinWallEditorTool extends MapEditorTool {
             if (!this.active) {
                 return;
             }
-            if (this.mode !== WallEditorToolMode.Placing) {
+            if (this.mode !== ToolMode.Placing) {
                 return;
             }
             if (pointer.rightButtonDown()) {
@@ -273,5 +265,22 @@ export class ThinWallEditorTool extends MapEditorTool {
 
     private nextTexture(): void {
         this.selectedTextureNumber = ((this.selectedTextureNumber += 1) % GlobalConfig.THIN_WALLS_COUNT);
+    }
+
+    private getOffset(edge: TileEdge): { x: number, y: number} {
+        switch (edge) {
+            case TileEdge.N: {
+                return {
+                    x: 96,
+                    y: 48,
+                };
+            }
+            case TileEdge.W: {
+                return {
+                    x: 32,
+                    y: 48,
+                };
+            }
+        }
     }
 }

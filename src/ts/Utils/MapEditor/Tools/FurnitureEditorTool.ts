@@ -4,11 +4,7 @@ import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
 import { GlobalConfig } from '../../../GlobalConfig';
 import { Furniture } from '../../../GameObjects/GameScene/Furniture';
-
-export enum FurnitureEditorToolMode {
-    Placing,
-    Deleting,
-}
+import { ToolMode } from '../MapEditor';
 
 export class FurnitureEditorTool extends MapEditorTool {
 
@@ -18,8 +14,7 @@ export class FurnitureEditorTool extends MapEditorTool {
     private furniturePreview?: Phaser.GameObjects.Image;
 
     private selectedTextureNumber: number;
-
-    private mode: FurnitureEditorToolMode;
+    private mode: ToolMode;
 
 
     constructor(scene: Phaser.Scene, mapManager: MapManager) {
@@ -39,7 +34,7 @@ export class FurnitureEditorTool extends MapEditorTool {
 
     public activate(): void {
         this.active = true;
-        this.setMode(FurnitureEditorToolMode.Placing);
+        this.setMode(ToolMode.Placing);
         this.updatePreview();
     }
 
@@ -52,11 +47,11 @@ export class FurnitureEditorTool extends MapEditorTool {
     public handleKeyDownEvent(key: string): void {
         switch (key) {
             case 'q': {
-                this.setMode(FurnitureEditorToolMode.Placing);
+                this.setMode(ToolMode.Placing);
                 break;
             }
             case 'w': {
-                this.setMode(FurnitureEditorToolMode.Deleting);
+                this.setMode(ToolMode.Deleting);
                 break;
             }
             case 'e': {
@@ -71,7 +66,7 @@ export class FurnitureEditorTool extends MapEditorTool {
             if (!this.active) {
                 return;
             }
-            if (this.mode !== FurnitureEditorToolMode.Placing) {
+            if (this.mode !== ToolMode.Placing) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -85,21 +80,21 @@ export class FurnitureEditorTool extends MapEditorTool {
             }
 
             this.mapManager.on(MapManagerEvent.FurniturePointedOver, (furniture: Furniture) => {
-                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 furniture.setTint(0xff0000);
             });
 
             this.mapManager.on(MapManagerEvent.FurniturePointedOut, (furniture: Furniture) => {
-                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 furniture.clearTint();
             });
 
             this.mapManager.on(MapManagerEvent.FurniturePressedDown, (furniture: Furniture) => {
-                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                if (!this.active || this.mode !== ToolMode.Deleting) {
                     return;
                 }
                 this.mapManager.removeFurniture(furniture);
@@ -107,13 +102,7 @@ export class FurnitureEditorTool extends MapEditorTool {
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== FurnitureEditorToolMode.Placing) {
-                return;
-            }
-            if (pointer.rightButtonDown()) {
+            if (!this.active || this.mode !== ToolMode.Placing || pointer.rightButtonDown()) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -124,20 +113,18 @@ export class FurnitureEditorTool extends MapEditorTool {
         });
     }
 
-    private setMode(mode: FurnitureEditorToolMode): void {
+    private setMode(mode: ToolMode): void {
         if (this.mode === mode) {
             return;
         }
         this.mode = mode;
         switch (mode) {
-            case FurnitureEditorToolMode.Placing: {
-                console.log('PLACING MODE');
+            case ToolMode.Placing: {
                 this.mapManager.getAllFurnitures().forEach(furniture => furniture.clearTint());
                 this.updatePreview();
                 break;
             }
-            case FurnitureEditorToolMode.Deleting: {
-                console.log('DELETE MODE');
+            case ToolMode.Deleting: {
                 this.furniturePreview?.destroy();
                 this.furniturePreview = undefined;
                 break;
@@ -154,6 +141,7 @@ export class FurnitureEditorTool extends MapEditorTool {
         this.furniturePreview?.setTexture(keyFrame.key, keyFrame.frame)
             .setOrigin(0.5, 0.5)
             .setAlpha(0.85)
+            // NOTE: Should it be always on top?
             .setDepth(1000 + pointer.y);
     }
 

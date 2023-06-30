@@ -3,23 +3,17 @@ import { MathHelper } from '../../Helpers/MathHelper';
 import { MapManager } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
 import { GlobalConfig } from '../../../GlobalConfig';
-
-export enum FloorEditorToolMode {
-    Placing,
-    Deleting,
-}
+import { ToolMode } from '../MapEditor';
 
 export class FloorEditorTool extends MapEditorTool {
 
     private scene: Phaser.Scene;
     private mapManager: MapManager;
-
-    private floorPreview: Phaser.GameObjects.Image[];
-
+    
+    private mode: ToolMode;
     private selectedTextureNumber: number;
-
-    private mode: FloorEditorToolMode;
-
+    
+    private floorPreview: Phaser.GameObjects.Image[];
     private placementShapeStart?: { x: number, y: number };
     private placementShapeEnd?: { x: number, y: number };
     private shapeChunkCoords: { x: number, y: number }[];
@@ -43,7 +37,7 @@ export class FloorEditorTool extends MapEditorTool {
 
     public activate(): void {
         this.active = true;
-        this.setMode(FloorEditorToolMode.Placing);
+        this.setMode(ToolMode.Placing);
         this.createChunkPreviewIfNeeded();
     }
 
@@ -53,17 +47,16 @@ export class FloorEditorTool extends MapEditorTool {
         this.floorPreview = [];
         this.placementShapeStart = undefined;
         this.placementShapeEnd = undefined;
-        // this.mapManager.getAllWalls().forEach(wall => wall.clearTint());
     }
 
     public handleKeyDownEvent(key: string): void {
         switch (key) {
             case 'q': {
-                this.setMode(FloorEditorToolMode.Placing);
+                this.setMode(ToolMode.Placing);
                 break;
             }
             case 'w': {
-                this.setMode(FloorEditorToolMode.Deleting);
+                this.setMode(ToolMode.Deleting);
                 break;
             }
             case 'e': {
@@ -75,10 +68,7 @@ export class FloorEditorTool extends MapEditorTool {
 
     private bindEventHandlers(): void {
         this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== FloorEditorToolMode.Placing) {
+            if (!this.active || this.mode !== ToolMode.Placing) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -86,23 +76,24 @@ export class FloorEditorTool extends MapEditorTool {
                 return;
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
+            const offset = { x: 64, y: 32 };
             if (!this.placementShapeStart) {
-                this.floorPreview[0].x = position.x + 64;
-                this.floorPreview[0].y = position.y + 32;
+                this.floorPreview[0].x = position.x + offset.x;
+                this.floorPreview[0].y = position.y + offset.y;
             } else {
                 this.placementShapeEnd = coords;
                 if (this.placementShapeStart && this.placementShapeEnd) {
                     this.shapeChunkCoords = this.getShapeChunkCoords(this.placementShapeStart, this.placementShapeEnd);
 
-                    // it would be a nice place to use Object Pool.
+                    // TODO: Objects Pool
                     this.floorPreview.forEach(floorChunk => floorChunk.destroy());
                     this.floorPreview = [];
 
                     for (const chunkData of this.shapeChunkCoords) {
                         const chunkPos = MathHelper.cartesianToIsometric({ x: chunkData.x * 64, y: chunkData.y * 64 });
                         this.floorPreview.push(this.scene.add.image(
-                            chunkPos.x + 64,
-                            chunkPos.y + 32,
+                            chunkPos.x + offset.x,
+                            chunkPos.y + offset.y,
                             'floorAtlas',
                             this.selectedTextureNumber,
                         )
@@ -116,13 +107,7 @@ export class FloorEditorTool extends MapEditorTool {
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== FloorEditorToolMode.Placing) {
-                return;
-            }
-            if (pointer.rightButtonReleased()) {
+            if (!this.active || this.mode !== ToolMode.Placing || pointer.rightButtonReleased()) {
                 return;
             }
             if (this.placementShapeStart) {
@@ -144,13 +129,7 @@ export class FloorEditorTool extends MapEditorTool {
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-            if (!this.active) {
-                return;
-            }
-            if (this.mode !== FloorEditorToolMode.Placing) {
-                return;
-            }
-            if (pointer.rightButtonDown()) {
+            if (!this.active || this.mode !== ToolMode.Placing || pointer.rightButtonDown()) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -158,7 +137,6 @@ export class FloorEditorTool extends MapEditorTool {
                 return;
             }
             this.placementShapeStart = coords;
-            console.log(`start shape at: ${this.placementShapeStart?.x}, ${this.placementShapeStart?.y}`);
         });
     }
 
@@ -178,20 +156,17 @@ export class FloorEditorTool extends MapEditorTool {
         return positions;
     }
 
-    private setMode(mode: FloorEditorToolMode): void {
+    private setMode(mode: ToolMode): void {
         if (this.mode === mode) {
             return;
         }
         this.mode = mode;
         switch (mode) {
-            case FloorEditorToolMode.Placing: {
-                console.log('PLACING MODE');
-                // this.mapManager.getAllWalls().forEach(wall => wall121.clearTint());
+            case ToolMode.Placing: {
                 this.createChunkPreviewIfNeeded();
                 break;
             }
-            case FloorEditorToolMode.Deleting: {
-                console.log('DELETE MODE');
+            case ToolMode.Deleting: {
                 this.floorPreview.forEach(floorChunk => floorChunk.destroy());
                 this.floorPreview = [];
                 this.placementShapeStart = undefined;

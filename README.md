@@ -24,3 +24,22 @@ When tool is selected:
     e - next texture if available
     r - rotate if available
 ```
+
+## Notable parts of the code
+### MapManager.ts
+
+Holds logic and data needed to handle map properly
+### MapEditor.ts and the MapEditorTools
+
+All of the tooling needed for editing features to work
+### AStar.ts
+
+Custom implementation of A* algorithm to make pathfinding work with "thin" walls
+
+### GameScene.ts
+
+Main Phaser scene where it all happens
+
+### UiScene.ts
+
+Used as a vessel to always display minimap (and other UI components in the future) always above the GameScene
