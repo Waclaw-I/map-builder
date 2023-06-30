@@ -58,15 +58,15 @@ export class FloorEditorTool extends MapEditorTool {
 
     public handleKeyDownEvent(key: string): void {
         switch (key) {
-            case '1': {
+            case 'q': {
                 this.setMode(FloorEditorToolMode.Placing);
                 break;
             }
-            case '2': {
+            case 'w': {
                 this.setMode(FloorEditorToolMode.Deleting);
                 break;
             }
-            case 'q': {
+            case 'e': {
                 this.nextTexture();
                 this.createChunkPreviewIfNeeded();
             }

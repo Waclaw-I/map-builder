@@ -48,19 +48,19 @@ export class MapEditor extends Phaser.Events.EventEmitter {
     public handleKeyDownEvent(key: string): void {
         this.currentlyActiveTool?.handleKeyDownEvent(key);
         switch (key) {
-            case 'w': {
+            case '0': {
                 this.equipTool(MapEditorToolName.WallEditor);
                 break;
             }
-            case 't': {
+            case '1': {
                 this.equipTool(MapEditorToolName.ThinWallEditor);
                 break;
             }
-            case 'f': {
+            case '2': {
                 this.equipTool(MapEditorToolName.FloorEditor);
                 break;
             }
-            case 'i': {
+            case '3': {
                 this.equipTool(MapEditorToolName.FurnitureEditor);
                 break;
             }

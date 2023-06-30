@@ -63,22 +63,23 @@ export class ThinWallEditorTool extends MapEditorTool {
 
     public handleKeyDownEvent(key: string): void {
         switch (key) {
-            case '1': {
+            case 'q': {
                 this.setMode(WallEditorToolMode.Placing);
                 break;
             }
-            case '2': {
+            case 'w': {
                 this.setMode(WallEditorToolMode.Deleting);
+                break;
+            }
+            case 'e': {
+                this.nextTexture();
+                this.createChunkPreviewIfNeeded();
                 break;
             }
             case 'r': {
                 this.previewEdge = this.previewEdge === TileEdge.N ? TileEdge.W : TileEdge.N;
                 this.createChunkPreviewIfNeeded();
                 break;
-            }
-            case 'q': {
-                this.nextTexture();
-                this.createChunkPreviewIfNeeded();
             }
         }
     }

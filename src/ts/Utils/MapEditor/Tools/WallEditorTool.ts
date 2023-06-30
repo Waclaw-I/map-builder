@@ -55,11 +55,11 @@ export class WallEditorTool extends MapEditorTool {
 
     public handleKeyDownEvent(key: string): void {
         switch (key) {
-            case '1': {
+            case 'q': {
                 this.setMode(WallEditorToolMode.Placing);
                 break;
             }
-            case '2': {
+            case 'w': {
                 this.setMode(WallEditorToolMode.Deleting);
                 break;
             }

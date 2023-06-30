@@ -51,15 +51,15 @@ export class FurnitureEditorTool extends MapEditorTool {
 
     public handleKeyDownEvent(key: string): void {
         switch (key) {
-            case '1': {
+            case 'q': {
                 this.setMode(FurnitureEditorToolMode.Placing);
                 break;
             }
-            case '2': {
+            case 'w': {
                 this.setMode(FurnitureEditorToolMode.Deleting);
                 break;
             }
-            case 'q': {
+            case 'e': {
                 this.nextTexture();
                 this.updatePreview();
             }
