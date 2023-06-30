@@ -12,18 +12,13 @@ import { Helper } from '../Utils/Helpers/Helper';
 
 export class GameScene extends SceneTemplate {
 
-    private graphics: Phaser.GameObjects.Graphics;
-
     private player: Character;
-
-    private timer: number;
-
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-
     private mapManager: MapManager;
     private mapEditor: MapEditor;
     private mapProjection: CartesianMapProjection;
 
+    private timer: number;
     private draggingCamera: boolean;
     private lastCameraDragPosition: { x: number, y: number };
 
@@ -44,24 +39,15 @@ export class GameScene extends SceneTemplate {
         // TODO: ZOD would be nice here to check if data from JSON is in correct format.
         this.mapManager = new MapManager(this, 'map');
         this.mapEditor = new MapEditor(this, this.mapManager);
-        this.mapProjection = new CartesianMapProjection(
-            // NOTE: We pass in UI SCENE, not GAME SCENE. This way we can have our cartesian projection always on top, immovable
-            ScenesHelper.getScene(MyScene.UiScene),
-            16,
-            16,
-            {
-                mapWidth: this.mapManager.getDimensionsInTiles().width,
-                mapHeight: this.mapManager.getDimensionsInTiles().height,
-                tileWidth: this.mapManager.getTileDimensions().width,
-                tileHeight: this.mapManager.getTileDimensions().height,
-            },
-        )
-            .setAlpha(0.5);
+
+        this.initializeMapProjection();
 
         const mapDimensions = this.mapManager.getDimensionsInTiles();
+
         const spawnTileCoords = { x: Math.floor(mapDimensions.width / 2), y: Math.floor(mapDimensions.height / 2) };
         const spawnTile = this.mapManager.getFloorTileAt(spawnTileCoords.x, spawnTileCoords.y);
         this.player = new Character(this, spawnTile?.pixelX ?? 100, spawnTile?.pixelY ?? 100, 10);
+
         this.cameras.main.startFollow(this.player);
 
         this.bindEventHandlers();
@@ -87,9 +73,21 @@ export class GameScene extends SceneTemplate {
         
     }
 
-    // TODO: ADD THIS TO THE REGISTRY, DECOUPLE MAP MANAGER FROM THE SCENE ENTIRELY, DIVIDE INTO LOGIC AND RENDER
-    public getMapManager(): MapManager {
-        return this.mapManager;
+    private initializeMapProjection(): void {
+        const topLeftOffset = { x: 16, y: 16 };
+        this.mapProjection = new CartesianMapProjection(
+            // NOTE: We pass in UI SCENE, not GAME SCENE. This way we can have our cartesian projection always on top, immovable
+            ScenesHelper.getScene(MyScene.UiScene),
+            topLeftOffset.x,
+            topLeftOffset.y,
+            {
+                mapWidth: this.mapManager.getDimensionsInTiles().width,
+                mapHeight: this.mapManager.getDimensionsInTiles().height,
+                tileWidth: this.mapManager.getTileDimensions().width,
+                tileHeight: this.mapManager.getTileDimensions().height,
+            },
+        )
+            .setAlpha(0.5);
     }
 
     private handleCursorsInput() {
@@ -166,7 +164,7 @@ export class GameScene extends SceneTemplate {
             this.draggingCamera = false;
         });
 
-        this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+        this.input.keyboard?.on(Phaser.Input.Keyboard.Events.ANY_KEY_DOWN, (event: KeyboardEvent) => {
             const key = event.key.toLowerCase();
             switch (key) {
                 case 'n': {

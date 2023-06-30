@@ -5,6 +5,7 @@ import { Wall } from '../GameObjects/GameScene/Wall';
 
 export enum MapManagerEvent {
     CollisionGridUpdated = 'CollisionGridUpdated',
+    
     WallPointedOver = 'WallPointedOver',
     WallPointedOut = 'WallPointedOut',
     WallPressedDown = 'WallPressedDown',
@@ -30,12 +31,12 @@ export class MapManager extends Phaser.Events.EventEmitter {
     private tiles: Tile[][];
 
     private walls: (Wall | undefined)[][];
-    private wallArray: Wall[];
     // Each tile can have two walls, on N and W side.
     private thinWalls: Record<TileEdge, ThinWall | undefined>[][];
-    private thinWallsArray: ThinWall[];
-
     private furnitures: (Furniture | undefined)[][];
+
+    private thinWallsArray: ThinWall[];
+    private wallArray: Wall[];
     private furnituresArray: Furniture[];
 
     private wallsHidden: boolean;
@@ -161,7 +162,6 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     public getFloorTileAtWorldXY(x: number, y: number): Phaser.Tilemaps.Tile | null {
-        // + 64 is a hack to fix weirdly working getTileAtWorldXY method
         return this.map.getTileAtWorldXY(x, y + 64, true, undefined, this.tilemapLayers.get('floor'));
     }
 
@@ -279,6 +279,7 @@ export class MapManager extends Phaser.Events.EventEmitter {
     }
 
     private initializeMap(mapKey: string): void {
+        // NOTE: Making use of Tiled. Probably would be better to ditch Tiled altogether in the future
         this.map = this.scene.add.tilemap(mapKey);
         this.tilesets = new Map<string, Phaser.Tilemaps.Tileset>();
         this.tilemapLayers = new Map<string, Phaser.Tilemaps.TilemapLayer>();

@@ -1,4 +1,3 @@
-import { Gamestate } from '../../Gamestate';
 import { Helper } from '../Helpers/Helper';
 import { MapManager } from '../MapManager';
 import { FloorEditorTool } from './Tools/FloorEditorTool';
@@ -24,8 +23,6 @@ export class MapEditor extends Phaser.Events.EventEmitter {
     private scene: Phaser.Scene;
     private mapManager: MapManager;
 
-    private gamestate: Gamestate;
-
     private editorTools: Record<MapEditorToolName, MapEditorTool>;
     private activeToolName?: MapEditorToolName;
 
@@ -34,8 +31,6 @@ export class MapEditor extends Phaser.Events.EventEmitter {
 
         this.scene = scene;
         this.mapManager = mapManager;
-
-        this.gamestate = Helper.getGamestate();
 
         this.editorTools = {
             [MapEditorToolName.WallEditor]: new WallEditorTool(this.scene, this.mapManager),
