@@ -113,27 +113,6 @@ export class FloorEditorTool extends MapEditorTool {
                     }
                 }
             }
-
-            // this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     wall.setTint(0xff0000);
-            // });
-
-            // this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     wall.clearTint();
-            // });
-
-            // this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     this.mapManager.removeThinWall(wall);
-            // });
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {

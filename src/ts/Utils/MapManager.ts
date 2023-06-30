@@ -59,6 +59,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
         this.tilemapLayers.get('floor')?.putTileAt(textureNumber + 1, coords.x, coords.y);
     }
 
+    public removeFloor(coords: { x: number, y: number }): void {
+        this.tilemapLayers.get('floor')?.putTileAt(-1, coords.x, coords.y);
+    }
+
     public placeFurniture(coords: { x: number, y: number }, textureNumber: number): void {
         const furniture = new Furniture(this.scene, coords, textureNumber);
         furniture.place();
@@ -264,6 +268,10 @@ export class MapManager extends Phaser.Events.EventEmitter {
         return this.thinWallsArray;
     }
 
+    public getAllFurnitures(): Furniture[] {
+        return this.furnituresArray;
+    }
+
     public switchHideWalls(): void {
         this.wallsHidden = !this.wallsHidden;
         this.wallArray.forEach(wall => wall.hide(this.wallsHidden));
@@ -334,14 +342,14 @@ export class MapManager extends Phaser.Events.EventEmitter {
 
     private bindFurnitureEventHandlers(furniture: Furniture): void {
         furniture.on(Phaser.Input.Events.POINTER_OVER, () => {
-            this.emit(MapManagerEvent.WallPointedOver, furniture);
+            this.emit(MapManagerEvent.FurniturePointedOver, furniture);
         });
         furniture.on(Phaser.Input.Events.POINTER_OUT, () => {
-            this.emit(MapManagerEvent.WallPointedOut, furniture);
+            this.emit(MapManagerEvent.FurniturePointedOut, furniture);
         });
         furniture.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
             if (pointer.leftButtonDown()) {
-                this.emit(MapManagerEvent.WallPressedDown, furniture);
+                this.emit(MapManagerEvent.FurniturePressedDown, furniture);
             }
         });
     }

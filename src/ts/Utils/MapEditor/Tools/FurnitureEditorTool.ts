@@ -1,8 +1,9 @@
 import { KeyFrame } from '@home-based-studio/phaser3-utils';
 import { MathHelper } from '../../Helpers/MathHelper';
-import { MapManager } from '../../MapManager';
+import { MapManager, MapManagerEvent } from '../../MapManager';
 import { MapEditorTool } from './MapEditorTool';
 import { GlobalConfig } from '../../../GlobalConfig';
+import { Furniture } from '../../../GameObjects/GameScene/Furniture';
 
 export enum FurnitureEditorToolMode {
     Placing,
@@ -78,32 +79,31 @@ export class FurnitureEditorTool extends MapEditorTool {
                 return;
             }
             const position = MathHelper.cartesianToIsometric({ x: coords.x * 64, y: coords.y * 64 });
-            console.log(coords);
             if (this.furniturePreview) {
                 this.furniturePreview.x = position.x + 64;
                 this.furniturePreview.y = position.y;
             }
 
-            // this.mapManager.on(MapManagerEvent.WallPointedOver, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     wall.setTint(0xff0000);
-            // });
+            this.mapManager.on(MapManagerEvent.FurniturePointedOver, (furniture: Furniture) => {
+                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                    return;
+                }
+                furniture.setTint(0xff0000);
+            });
 
-            // this.mapManager.on(MapManagerEvent.WallPointedOut, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     wall.clearTint();
-            // });
+            this.mapManager.on(MapManagerEvent.FurniturePointedOut, (furniture: Furniture) => {
+                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                    return;
+                }
+                furniture.clearTint();
+            });
 
-            // this.mapManager.on(MapManagerEvent.WallPressedDown, (wall: ThinWall) => {
-            //     if (!this.active || this.mode !== FloorEditorToolMode.Deleting) {
-            //         return;
-            //     }
-            //     this.mapManager.removeThinWall(wall);
-            // });
+            this.mapManager.on(MapManagerEvent.FurniturePressedDown, (furniture: Furniture) => {
+                if (!this.active || this.mode !== FurnitureEditorToolMode.Deleting) {
+                    return;
+                }
+                this.mapManager.removeFurniture(furniture);
+            });
         });
 
         this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
@@ -113,7 +113,7 @@ export class FurnitureEditorTool extends MapEditorTool {
             if (this.mode !== FurnitureEditorToolMode.Placing) {
                 return;
             }
-            if (pointer.rightButtonReleased()) {
+            if (pointer.rightButtonDown()) {
                 return;
             }
             const coords = this.mapManager.getFloorTileIndexAtWorldXY(pointer.worldX, pointer.worldY);
@@ -132,12 +132,13 @@ export class FurnitureEditorTool extends MapEditorTool {
         switch (mode) {
             case FurnitureEditorToolMode.Placing: {
                 console.log('PLACING MODE');
-                // this.mapManager.getAllWalls().forEach(wall => wall121.clearTint());
+                this.mapManager.getAllFurnitures().forEach(furniture => furniture.clearTint());
                 this.updatePreview();
                 break;
             }
             case FurnitureEditorToolMode.Deleting: {
                 console.log('DELETE MODE');
+                this.furniturePreview?.destroy();
                 this.furniturePreview = undefined;
                 break;
             }
