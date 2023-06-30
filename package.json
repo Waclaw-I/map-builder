@@ -1,5 +1,5 @@
 {
-  "name": "boilerplate",
+  "name": "map-editor",
   "version": "1.0.3",
   "boilerplate_version": "1.0.3",
   "description": "",
@@ -11,11 +11,7 @@
     "preview": "npx http-server ./dist --port 8000",
     "preview:firebase": "firebase emulators:start",
     "lint": "eslint .",
-    "deploy": "webpack --env env=production && firebase deploy --only hosting"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://gitlab.com/homebasedstudio/phasergameboilerplate"
+    "deploy": "webpack --env env=production && firebase deploy --only hosting:map-editor"
   },
   "author": "Home-based Studio",
   "license": "UNLICENSED",
@@ -49,7 +45,6 @@
   "dependencies": {
     "@home-based-studio/phaser3-utils": "0.4.11",
     "bowser": "2.11.0",
-    "gameanalytics": "^4.4.5",
     "phaser": "^3.60.0",
     "phaser3-rex-plugins": "^1.1.73",
     "svelte": "^4.0.0",

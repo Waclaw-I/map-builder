@@ -43,7 +43,7 @@ export class Character extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
     }
 
-    public update(time: number, dt: number) {
+    public update() {
         if (this.pathToFollow) {
             const moveBy = this.computeFollowPathMovement();
             this.playRun(this.getDirectionFromMovementVector(moveBy));
@@ -85,7 +85,7 @@ export class Character extends Phaser.GameObjects.Container {
     public move(direction: Direction, mapManager: MapManager): void {
         this.currentlyRunningManually = true;
         if (this.pathToFollow) {
-            this.finishFollowingPath(true);
+            this.finishFollowingPath();
         }
         this.playRun(direction);
         let nextX = this.x;
@@ -135,7 +135,7 @@ export class Character extends Phaser.GameObjects.Container {
         }
     }
 
-    public finishFollowingPath(cancelled = false): void {
+    public finishFollowingPath(): void {
         this.pathToFollow = undefined;
         this.stopRunningAsPathFollow();
     }

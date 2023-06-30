@@ -1,4 +1,4 @@
-interface AssetGroupConfig {
+export interface AssetGroupConfig {
     [groupName: string]: { [assetKey: string]: string | string[] };
 }
 

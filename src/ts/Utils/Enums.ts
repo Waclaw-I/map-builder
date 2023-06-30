@@ -41,8 +41,3 @@ export enum Color {
     HomeBasedStudioBlue = 0x090731,
     Text1 = 0x144b69,
 }
-
-export enum Language {
-    EN = 'en-EN',
-    PL = 'pl-PL',
-}

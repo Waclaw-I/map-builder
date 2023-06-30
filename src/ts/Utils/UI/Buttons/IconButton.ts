@@ -1,5 +1,4 @@
 import { KeyFrame, Point } from '@home-based-studio/phaser3-utils';
-import { AudioManager } from '../../AudioManager';
 
 // TODO: Move to HBS-utils, give configuration options
 export class IconButton extends Phaser.GameObjects.Container {

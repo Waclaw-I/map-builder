@@ -28,7 +28,7 @@ export class ImageProgressBar extends Phaser.GameObjects.Container {
 
         this.emptyBarImage = this.scene.add.image(0, 0, config.emptyBarImage.key, config.emptyBarImage.frame);
         this.fullBarImage = this.scene.add.image(0, 0, config.fullBarImage.key, config.fullBarImage.frame);
-        this.setBarProgress(config.progress ?? 0);
+        this.setBarProgress(config.progress ?? 0).catch(e => console.warn(e));
         this.currentProgress = 0;
         this.vertical = config.vertical ?? false;
         this.reversed = config.reversed ?? false;
@@ -39,7 +39,7 @@ export class ImageProgressBar extends Phaser.GameObjects.Container {
         ]);
 
         if (config.progress !== undefined) {
-            this.setBarProgress(config.progress);
+            this.setBarProgress(config.progress).catch(e => console.warn(e));
         }
 
         this.setSize(this.emptyBarImage.displayWidth, this.emptyBarImage.displayHeight);
@@ -48,7 +48,7 @@ export class ImageProgressBar extends Phaser.GameObjects.Container {
     }
 
     public async setBarProgress(progress: number, animationDuration: number = 0): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const clampedProgress = Phaser.Math.Clamp(progress, 0, 1);
             if (animationDuration === 0) {
                 this.changeBarProgress(clampedProgress);
@@ -76,7 +76,7 @@ export class ImageProgressBar extends Phaser.GameObjects.Container {
         await CommonAnimations.asyncAnimation(
             CommonAnimations.fade(this.scene, undefined, undefined, this.fullBarImage));
         this.fullBarImage.clearTint();
-        this.setBarProgress(0);
+        this.setBarProgress(0).catch(e => console.warn(e));
         this.fullBarImage.setAlpha(1);
     }
 

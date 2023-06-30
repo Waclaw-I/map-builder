@@ -5,20 +5,10 @@
         <link rel="stylesheet" href="index.css">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, minimal-ui">
-        <meta name="description" content="Boilerplate Game!">
-        <title>Boilerplate</title>
+        <meta name="description" content="Map Editor">
+        <title>Map Editor</title>
     </head>
     <body>
         <div id="container"></div>
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./service-worker.js').then(
-                    registration => {},
-                    error => console.error('Service worker registration failed:', error),
-                );
-            } else {
-                console.warn('Service workers are not supported.');
-            }
-        </script>
     </body>
 </html>

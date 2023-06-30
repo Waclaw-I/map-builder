@@ -2,7 +2,7 @@ import { Easing } from '@home-based-studio/phaser3-utils/lib/utils/types/Types';
 
 export class CommonAnimations {
 
-    public static bounce(scene: Phaser.Scene, endScale?: number, ...targets: any): void {
+    public static bounce(scene: Phaser.Scene, endScale?: number, ...targets: unknown[]): void {
         scene.tweens.add({
             targets,
             duration: 100,
@@ -19,7 +19,7 @@ export class CommonAnimations {
         });
     }
 
-    public static bounceDown(scene: Phaser.Scene, startScale?: number, ...targets: any): void {
+    public static bounceDown(scene: Phaser.Scene, startScale?: number, ...targets: unknown[]): void {
         scene.tweens.add({
             targets,
             duration: 100,
@@ -28,7 +28,7 @@ export class CommonAnimations {
         });
     }
 
-    public static bounceUp(scene: Phaser.Scene, endScale?: number, ...targets: any): void {
+    public static bounceUp(scene: Phaser.Scene, endScale?: number, ...targets: unknown[]): void {
         scene.tweens.add({
             targets,
             duration: 300,
@@ -37,7 +37,7 @@ export class CommonAnimations {
         });
     }
 
-    public static showWithBounce(scene: Phaser.Scene, endScale?: number, ...targets: any): Phaser.Tweens.Tween {
+    public static showWithBounce(scene: Phaser.Scene, endScale?: number, ...targets: unknown[]): Phaser.Tweens.Tween {
         const tween = scene.tweens.add({
             targets,
             duration: 200,
@@ -58,7 +58,7 @@ export class CommonAnimations {
         return tween;
     }
 
-    public static hideWithBounce(scene: Phaser.Scene, startScale?: number, ...targets: any): Phaser.Tweens.Tween {
+    public static hideWithBounce(scene: Phaser.Scene, startScale?: number, ...targets: unknown[]): Phaser.Tweens.Tween {
         const tween = scene.tweens.add({
             targets,
             duration: 200,
@@ -79,7 +79,7 @@ export class CommonAnimations {
         return tween;
     }
 
-    public static fade(scene: Phaser.Scene, reverse?: boolean, alpha?: number, ...targets: any): Phaser.Tweens.Tween {
+    public static fade(scene: Phaser.Scene, reverse?: boolean, alpha?: number, ...targets: unknown[]): Phaser.Tweens.Tween {
         const tween = scene.tweens.add({
             targets,
             duration: 200,
@@ -93,7 +93,7 @@ export class CommonAnimations {
     }
 
     public static asyncAnimation(tween: Phaser.Tweens.Tween): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>((resolve) => {
             tween.on('done', () => {
                 resolve();
             });

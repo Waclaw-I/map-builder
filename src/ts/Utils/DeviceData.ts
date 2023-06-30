@@ -32,7 +32,7 @@ export class DeviceData {
         this.initFloatOsVersion();
         
         this.deviceType = this.browser.getPlatformType(true);
-        this.mobile = ['tablet', 'mobile'].includes(this.deviceType);
+        this.mobile = [ 'tablet', 'mobile' ].includes(this.deviceType);
         this.browserName = this.browser.getBrowserName().toLowerCase();
         this.touchDevice = ('ontouchstart' in window);
         this.initScreenResolution(window);

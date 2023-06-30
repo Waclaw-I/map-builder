@@ -77,10 +77,14 @@ export class GameScene extends SceneTemplate {
         this.timer += dt;
         while (this.timer > GlobalConfig.TICK_DURATION) {
             this.handleCursorsInput();
-            this.player.update(time, dt);
+            this.player.update();
             this.mapProjection.updatePlayerPosition(this.player.x, this.player.y);
             this.timer -= GlobalConfig.TICK_DURATION;
         }
+    }
+
+    public resize(): void {
+        
     }
 
     // TODO: ADD THIS TO THE REGISTRY, DECOUPLE MAP MANAGER FROM THE SCENE ENTIRELY, DIVIDE INTO LOGIC AND RENDER
@@ -158,14 +162,14 @@ export class GameScene extends SceneTemplate {
             }
         });
 
-        this.input.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
+        this.input.on(Phaser.Input.Events.POINTER_UP, () => {
             this.draggingCamera = false;
         });
 
         this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
             const key = event.key.toLowerCase();
             switch (key) {
-                case 'e': {
+                case 'n': {
                     this.gamestate.turnMapEditorOn(!this.gamestate.isMapEditorOn());
                     break;
                 }

@@ -1,5 +1,14 @@
 {
   "projects": {
-    "default": "FIREBASE-PROJECT-NAME"
+    "default": "hbs-homepage"
+  },
+  "targets": {
+    "hbs-homepage": {
+      "hosting": {
+        "map-editor": [
+          "map-editor"
+        ]
+      }
+    }
   }
 }

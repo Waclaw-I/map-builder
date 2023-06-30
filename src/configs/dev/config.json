@@ -1,9 +1,3 @@
 {
-    "debug": true,
-    "showHBSLogo": false,
-    "sendAnalyticalEvents": false,
-    "logAnalyticalEvents": true,
-    "defaultLanguage": "en",
-
-    "gameAnalyticsSecretKey": ""
+    "debug": true
 }

@@ -1,10 +1,8 @@
 import { BootScene } from '../../Scenes/BootScene';
 import { GameScene } from '../../Scenes/GameScene';
 import { LoadScene } from '../../Scenes/LoadScene';
-import { PopupScene } from '../../Scenes/PopupScene';
+import { SceneTemplate } from '../../Scenes/SceneTemplate';
 import { UiScene } from '../../Scenes/UiScene';
-import { ResizableScene } from '../../Scenes/ResizableScene';
-import { PopupType } from '../Factories/PopupFactory';
 import { EventsHelper } from './EventsHelper';
 
 // NOTE: Ignoring Boot, Sound and Load scenes due to their singular purpose.
@@ -12,7 +10,6 @@ import { EventsHelper } from './EventsHelper';
 export enum MyScene {
     Game = 'GameScene',
     UiScene = 'UiScene',
-    Popup = 'PopupScene',
 }
 
 export class ScenesHelper {
@@ -20,7 +17,6 @@ export class ScenesHelper {
         return [
             BootScene,
             LoadScene,
-            PopupScene,
             GameScene,
             UiScene,
         ];
@@ -31,12 +27,6 @@ export class ScenesHelper {
 
     public static initialize(sceneManager: Phaser.Scenes.SceneManager): void {
         this.sceneManager = sceneManager;
-    }
-
-    public static showPopup(popupType: PopupType, popupConfig?: Record<string, any>): void {
-        const popupScene = this.getScene(MyScene.Popup) as PopupScene;
-
-        popupScene.showPopup(popupType, popupConfig);
     }
     
     public static getScene(key: string): Phaser.Scene {
@@ -53,7 +43,6 @@ export class ScenesHelper {
         scenePlugin.isSleeping(scene) ? scenePlugin.wake(scene, data) : scenePlugin.launch(scene, data);
         scenePlugin.bringToTop(scene);
         scenePlugin.bringToTop(MyScene.UiScene);
-        scenePlugin.bringToTop(MyScene.Popup);
         ScenesHelper.currentScene = scenePlugin.get(scene);
         scenePlugin.scene.sys.game.events.emit(EventsHelper.events.sceneChanged, scene);
     }
@@ -69,15 +58,15 @@ export class ScenesHelper {
     public static sleepUiScene(sleep: boolean): void {
         const scenePlugin = ScenesHelper.currentScene.scene;
         if (sleep) {
-            if (scenePlugin.isSleeping('UiScene')) {
+            if (scenePlugin.isSleeping(MyScene.UiScene)) {
                 return;
             }
-            ScenesHelper.currentScene.scene.sleep('UiScene');
+            ScenesHelper.currentScene.scene.sleep(MyScene.UiScene);
         } else {
-            if (scenePlugin.isActive('UiScene')) {
+            if (scenePlugin.isActive(MyScene.UiScene)) {
                 return;
             }
-            ScenesHelper.currentScene.scene.wake('UiScene');
+            ScenesHelper.currentScene.scene.wake(MyScene.UiScene);
         }
     }
 
@@ -85,8 +74,8 @@ export class ScenesHelper {
         for (const scene of this.sceneManager.getScenes(false)) {
 
             if (scene.scene.isActive() || scene.scene.isPaused()) {
-                if ((scene as ResizableScene).resize !== undefined) {
-                    (scene as ResizableScene).resize(ratio);
+                if ((scene as SceneTemplate).resize !== undefined) {
+                    (scene as SceneTemplate).resize(ratio);
                 }
             }
         }

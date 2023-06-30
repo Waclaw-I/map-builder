@@ -1,4 +1,3 @@
-import { AudioManager } from '../../AudioManager';
 
 export class StateButton extends Phaser.GameObjects.Image {
 

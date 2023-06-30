@@ -1,9 +1,6 @@
 import { Gamestate } from '../Gamestate';
-import { GlobalConfig } from '../GlobalConfig';
 import { Helper } from '../Utils/Helpers/Helper';
 import { TexturesHelper } from '../Utils/Helpers/TexturesHelper';
-import { TypesHelper } from '../Utils/Helpers/TypesHelper';
-import { Translation } from '../Utils/Translations';
 
 export class BootScene extends Phaser.Scene {
 
@@ -27,19 +24,10 @@ export class BootScene extends Phaser.Scene {
 
         Helper.registry = this.registry;
         TexturesHelper.initialize(this.textures);
-        this.initializeTranslation(Helper.getPossibleLanguage());
         this.registry.set('gamestate', new Gamestate(this.sys.game.events));
     }
 
     public create(): void {
         this.scene.start('LoadScene');
-    }
-
-    private initializeTranslation(language?: string): void {
-        let pickedLanguage = GlobalConfig.GAME_CONFIG.defaultLanguage;
-        if (language && TypesHelper.isStringOfLanguageType(language)) {
-            pickedLanguage = language;
-        }
-        this.registry.set('translation', new Translation(pickedLanguage));
     }
 }

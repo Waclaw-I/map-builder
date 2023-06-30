@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import * as WebFontLoader from 'phaser3-rex-plugins/dist/rexwebfontloaderplugin.min';
-import * as InputTextPlugin from 'phaser3-rex-plugins/dist/rexinputtextplugin.min';
 
 import { ScenesHelper } from './Utils/Helpers/ScenesHelper';
 import { MathHelper } from '@home-based-studio/phaser3-utils';
@@ -113,8 +112,7 @@ class Game {
             version: GlobalConfig.GAME_VERSION,
             plugins: {
                 global: [
-                    { key: 'WebFontLoader', plugin: WebFontLoader, start: true },
-                    { key: 'rexInputTextPlugin', plugin: InputTextPlugin, start: true },
+                    { key: 'WebFontLoader', plugin: WebFontLoader as unknown, start: true },
                 ],
             },
             dom: {

@@ -85,14 +85,10 @@ module.exports = webpackEnvVars => {
         devtool,
         devServer,
         entry: {
-            'service-worker': './src/service-worker.js',
             'game': './src/ts/game.ts',
         },
         output: {
             filename: ({ runtime }) => {
-                if (runtime === 'service-worker') {
-                    return '[name].js';
-                }
                 return '[name].[contenthash].js';
             },
             path: path.resolve(__dirname, 'dist'),

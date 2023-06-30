@@ -7,5 +7,5 @@ export class EventsHelper {
         mapEditor: {
             switched: 'signal:map-editor-switched',
         },
-    }
+    };
 }
